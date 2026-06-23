@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens (mirrors tailwind.config.ts; available for raw CSS too)
+--------------------------------------------------------------------------- */
+:root {
+  --zama-yellow: #ffd208;
+  --ink: #111314;
+  --ink-muted: #5b6163;
+  --paper: #f2efec;
+  --paper-card: #ffffff;
+  --line: #e8e4df;
+
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    border-color: theme('colors.line.DEFAULT');
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv01';
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Expanded, tightly-tracked display type — the Zama editorial feel. */
+  .font-display {
+    font-stretch: 105%;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--zama-yellow);
+    color: var(--ink);
+  }
+
+  /* Tabular, legible numerals for amounts and addresses. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+@layer components {
+  /* --- Buttons ----------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-4 py-2.5
+           text-sm font-semibold transition-all duration-150
+           disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none
+           focus-visible:ring-2 focus-visible:ring-ink/15 active:translate-y-px;
+  }
+  .btn-primary {
+    @apply btn bg-zama-yellow text-ink hover:bg-zama-medium-yellow
+           hover:shadow-yellow-glow active:bg-zama-yellow-press;
+  }
+  .btn-dark {
+    @apply btn bg-ink text-white hover:bg-ink-soft;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink hover:bg-paper-sunken;
+  }
+  .btn-outline {
+    @apply btn border border-line-strong bg-paper-card text-ink hover:border-ink/30 hover:bg-paper-soft;
+  }
+
+  /* --- Surfaces ---------------------------------------------------------- */
+  .card {
+    @apply rounded-card border border-line bg-paper-card shadow-card;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line
+           bg-paper-card px-2.5 py-1 text-xs font-medium text-ink-muted;
+  }
+
+  /* --- The confidential / encrypted surface (signature dark panel) -------- */
+  .surface-cipher {
+    @apply rounded-card bg-ink text-white;
+    background-image: radial-gradient(
+      120% 140% at 100% 0%,
+      rgba(255, 210, 8, 0.16) 0%,
+      rgba(255, 210, 8, 0) 45%
+    );
+  }
+
+  /* Encrypted value placeholder that shimmers while hidden. */
+  .cipher-text {
+    @apply bg-clip-text text-transparent animate-cipher-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      #5b6163 0%,
+      #ffd208 35%,
+      #5b6163 70%,
+      #ffd208 100%
+    );
+    background-size: 200% 100%;
+  }
+}
+
+/* Subtle paper grain so large flat areas read as a crafted surface, not a void. */
+.bg-grain {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(17, 19, 20, 0.035) 1px, transparent 0);
+  background-size: 22px 22px;
+}
