@@ -55,7 +55,30 @@ struct TokenWrapperPair {
 | 8 | **??? (undocumented)** | `0xf6Ef9ADB61A48E29E36bc873070A46A3D2667ff3` | `0x167DC962808B32CFFFc7e14B5018c0bE06A3A208` |
 
 Symbols/decimals/names are read at runtime from each token (do NOT hardcode — render from chain).
-TODO(build): resolve pair #8's symbol when seeding config (cosmetic only — it renders dynamically regardless).
+
+### Per-token metadata — verified live (node scripts/verify-registry.mjs)
+
+| # | ERC-20 sym | ERC-20 dec | Confidential sym | Conf. dec | rate | valid |
+|---|---|---|---|---|---|---|
+| 1 | USDCMock | 6  | cUSDCMock | 6 | 1            | ✓ |
+| 2 | USDTMock | 6  | cUSDTMock | 6 | 1            | ✓ |
+| 3 | WETHMock | 18 | cWETHMock | 6 | 1000000000000 | ✓ |
+| 4 | BRONMock | 18 | cBRONMock | 6 | 1000000000000 | ✓ |
+| 5 | ZAMAMock | 18 | cZAMAMock | 6 | 1000000000000 | ✓ |
+| 6 | tGBPMock | 18 | ctGBPMock | 6 | 1000000000000 | ✓ |
+| 7 | XAUtMock | 6  | cXAUtMock | 6 | 1            | ✓ |
+| 8 | tGBP (undocumented) | 18 | ctGBP | 6 | 1000000000000 | ✓ |
+
+### ⚠️ Wrap/unwrap math — decimals are asymmetric (critical for Phase 5/6)
+
+- The confidential ERC-7984 wrapper is **always 6 decimals** (euint64 fits ~1.8e19).
+- The underlying ERC-20 may be 6 or 18 decimals.
+- `rate = 10^(erc20Decimals - 6)`:  6-dec tokens → rate 1;  18-dec tokens → rate 1e12.
+- **wrap(to, amount):** `amount` is in ERC-20 raw units; mints `amount / rate` confidential
+  units (6 dec). Amount is rounded DOWN to a multiple of `rate` (sub-rate dust ignored).
+- **unwrap:** burns confidential units (6 dec); releases `confidentialUnits * rate` ERC-20 raw.
+- UX rule: take the user's human amount → ERC-20 raw = `parseUnits(x, erc20Decimals)`;
+  confidential display = `formatUnits(handleValue, 6)`. Never assume the two decimals match.
 
 ## 3. Confidential wrapper logic — `ConfidentialWrapperV3`
 
