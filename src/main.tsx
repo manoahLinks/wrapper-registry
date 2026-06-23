@@ -7,6 +7,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import './index.css'
 import { wagmiConfig } from './config/wagmi'
 import { FhevmProvider } from './fhevm/FhevmProvider'
+import { ToastProvider } from './components/ui/Toast'
 import App from './App'
 
 const queryClient = new QueryClient({
@@ -30,7 +31,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowTheme} initialChain={wagmiConfig.chains[0]}>
           <FhevmProvider>
-            <App />
+            <ToastProvider>
+              <App />
+            </ToastProvider>
           </FhevmProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

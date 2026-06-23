@@ -1,5 +1,6 @@
 import { TokenGlyph } from '@/components/ui/TokenGlyph'
 import { AddressChip } from '@/components/ui/AddressChip'
+import { PairActions } from './PairActions'
 import { formatAmount } from '@/lib/format'
 import type { EnrichedPair } from '@/types'
 import type { PairBalances } from '@/hooks/useUserBalances'
@@ -8,6 +9,7 @@ interface PairCardProps {
   pair: EnrichedPair
   balances?: PairBalances
   isConnected: boolean
+  onRefresh?: () => void
   style?: React.CSSProperties
 }
 
@@ -25,7 +27,7 @@ function Badge({ tone, children }: { tone: 'registry' | 'local' | 'danger' | 'wa
   )
 }
 
-export function PairCard({ pair, balances, isConnected, style }: PairCardProps) {
+export function PairCard({ pair, balances, isConnected, onRefresh, style }: PairCardProps) {
   const { erc20Meta, confidentialMeta, isValid, source, metaDegraded, rate } = pair
 
   return (
@@ -108,6 +110,10 @@ export function PairCard({ pair, balances, isConnected, style }: PairCardProps) 
           </div>
         </div>
       )}
+
+      {/* Spacer pushes actions to the bottom for equal-height cards */}
+      <div className="flex-1" />
+      <PairActions pair={pair} onRefresh={onRefresh} />
     </div>
   )
 }

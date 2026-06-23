@@ -34,7 +34,7 @@ function CardSkeleton() {
 export function RegistryGrid() {
   const { isConnected } = useAccount()
   const { pairs, isLoading, isError, refetch, counts } = useRegistryPairs()
-  const { balances } = useUserBalances(pairs)
+  const { balances, refetch: refetchBalances } = useUserBalances(pairs)
   const [query, setQuery] = useState('')
   const [showRevoked, setShowRevoked] = useState(true)
 
@@ -142,6 +142,7 @@ export function RegistryGrid() {
               pair={pair}
               balances={balances[pair.confidential.toLowerCase()]}
               isConnected={isConnected}
+              onRefresh={refetchBalances}
               style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
             />
           ))}
