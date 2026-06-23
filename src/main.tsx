@@ -6,6 +6,7 @@ import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
 import '@rainbow-me/rainbowkit/styles.css'
 import './index.css'
 import { wagmiConfig } from './config/wagmi'
+import { FhevmProvider } from './fhevm/FhevmProvider'
 import App from './App'
 
 const queryClient = new QueryClient({
@@ -28,7 +29,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowTheme} initialChain={wagmiConfig.chains[0]}>
-          <App />
+          <FhevmProvider>
+            <App />
+          </FhevmProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

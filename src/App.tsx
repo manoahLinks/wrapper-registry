@@ -1,4 +1,5 @@
 import { Header } from './components/Header'
+import { NetworkBanner } from './components/NetworkBanner'
 import { BrandMark } from './components/BrandMark'
 
 const FEATURES = [
@@ -116,6 +117,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
+      <NetworkBanner />
       <main className="flex-1">
         <Hero />
         <FeatureGrid />

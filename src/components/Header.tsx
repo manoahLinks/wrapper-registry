@@ -1,5 +1,6 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { BrandMark } from './BrandMark'
+import { FhevmStatusPill } from './FhevmStatusPill'
 
 const NAV = [
   { label: 'Registry', href: '#registry' },
@@ -29,15 +30,9 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href="https://docs.zama.org/protocol/protocol-apps/registry-contract"
-            target="_blank"
-            rel="noreferrer"
-            className="pill hidden hover:border-ink/30 sm:inline-flex"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-state-success" />
-            Sepolia
-          </a>
+          <span className="hidden sm:inline-flex">
+            <FhevmStatusPill />
+          </span>
           <ConnectButton
             showBalance={false}
             accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
