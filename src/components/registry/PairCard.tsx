@@ -1,5 +1,6 @@
 import { TokenGlyph } from '@/components/ui/TokenGlyph'
 import { AddressChip } from '@/components/ui/AddressChip'
+import { ConfidentialBalance } from '@/components/ConfidentialBalance'
 import { PairActions } from './PairActions'
 import { formatAmount } from '@/lib/format'
 import type { EnrichedPair } from '@/types'
@@ -100,11 +101,17 @@ export function PairCard({ pair, balances, isConnected, onRefresh, style }: Pair
               </svg>
               {confidentialMeta.symbol} balance
             </div>
-            <div className="mt-0.5 font-mono text-sm">
-              {balances?.hasConfidential ? (
-                <span className="cipher-text font-semibold tracking-widest">••••••</span>
+            <div className="mt-0.5">
+              {balances ? (
+                <ConfidentialBalance
+                  contract={confidentialMeta.address}
+                  handle={balances.confidentialHandle}
+                  decimals={confidentialMeta.decimals}
+                  symbol={confidentialMeta.symbol}
+                  hasBalance={balances.hasConfidential}
+                />
               ) : (
-                <span className="tabular text-ink">0</span>
+                <span className="tabular font-mono text-sm text-ink">—</span>
               )}
             </div>
           </div>

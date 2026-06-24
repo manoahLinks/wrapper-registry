@@ -7,6 +7,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import './index.css'
 import { wagmiConfig } from './config/wagmi'
 import { FhevmProvider } from './fhevm/FhevmProvider'
+import { DecryptionProvider } from './fhevm/DecryptionProvider'
 import { ToastProvider } from './components/ui/Toast'
 import App from './App'
 
@@ -32,7 +33,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <RainbowKitProvider theme={rainbowTheme} initialChain={wagmiConfig.chains[0]}>
           <FhevmProvider>
             <ToastProvider>
-              <App />
+              <DecryptionProvider>
+                <App />
+              </DecryptionProvider>
             </ToastProvider>
           </FhevmProvider>
         </RainbowKitProvider>
