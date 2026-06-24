@@ -23,4 +23,15 @@ export default defineConfig({
     // The relayer SDK ships WASM and must not be pre-bundled by esbuild.
     exclude: ['@zama-fhe/relayer-sdk'],
   },
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          wallet: ['wagmi', 'viem', '@wagmi/core', '@rainbow-me/rainbowkit', '@tanstack/react-query'],
+        },
+      },
+    },
+  },
 })

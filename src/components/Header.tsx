@@ -2,10 +2,12 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { BrandMark } from './BrandMark'
 import { FhevmStatusPill } from './FhevmStatusPill'
 
+import { REPO_URL } from '@/config/app'
+
 const NAV = [
-  { label: 'Registry', href: '#registry' },
-  { label: 'Decrypt', href: '#decrypt' },
-  { label: 'Docs', href: '#docs' },
+  { label: 'Registry', href: '#registry', external: false },
+  { label: 'Decrypt', href: '#decrypt', external: false },
+  { label: 'Docs', href: REPO_URL, external: true },
 ]
 
 export function Header() {
@@ -21,6 +23,7 @@ export function Header() {
               <a
                 key={item.label}
                 href={item.href}
+                {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}
                 className="rounded-lg px-3 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-paper-sunken hover:text-ink"
               >
                 {item.label}

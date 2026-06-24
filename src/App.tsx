@@ -3,6 +3,7 @@ import { NetworkBanner } from './components/NetworkBanner'
 import { BrandMark } from './components/BrandMark'
 import { RegistryGrid } from './components/registry/RegistryGrid'
 import { DecryptPanel } from './components/decrypt/DecryptPanel'
+import { REPO_URL, ZAMA_DOCS_URL, REGISTRY_EXPLORER_URL } from './config/app'
 
 function Hero() {
   return (
@@ -42,13 +43,32 @@ function Hero() {
 }
 
 function Footer() {
+  const links = [
+    { label: 'Source', href: REPO_URL },
+    { label: 'Registry docs', href: ZAMA_DOCS_URL },
+    { label: 'Registry contract', href: REGISTRY_EXPLORER_URL },
+  ]
   return (
     <footer className="mt-8 border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 sm:flex-row sm:items-center">
+      <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between">
         <BrandMark size={30} />
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          {links.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-ink-muted hover:text-ink"
+            >
+              {l.label} ↗
+            </a>
+          ))}
+        </div>
+      </div>
+      <div className="mx-auto max-w-6xl px-5 pb-8">
         <p className="text-xs text-ink-faint">
-          Built on the official Zama Wrappers Registry · Not affiliated with Zama ·
-          Sepolia testnet
+          Built on the official Zama Wrappers Registry · Not affiliated with Zama · Sepolia testnet
         </p>
       </div>
     </footer>

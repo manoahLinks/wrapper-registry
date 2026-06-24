@@ -9,6 +9,7 @@ import { wagmiConfig } from './config/wagmi'
 import { FhevmProvider } from './fhevm/FhevmProvider'
 import { DecryptionProvider } from './fhevm/DecryptionProvider'
 import { ToastProvider } from './components/ui/Toast'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App'
 
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ const rainbowTheme = lightTheme({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <ErrorBoundary>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowTheme} initialChain={wagmiConfig.chains[0]}>
@@ -41,5 +43,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )

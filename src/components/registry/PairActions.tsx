@@ -27,9 +27,9 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
   const hasConfidential = balances?.hasConfidential ?? false
 
   return (
-    <div className="mt-3.5 flex gap-2 border-t border-line pt-3">
+    <div className="mt-3.5 grid grid-cols-3 gap-2 border-t border-line pt-3">
       <button
-        className="btn-outline flex-1 py-2 text-xs"
+        className="btn-outline w-full px-2 py-2 text-xs"
         disabled={!isConnected}
         onClick={() => setFaucetOpen(true)}
         title={disabledTitle ?? 'Claim test tokens'}
@@ -42,7 +42,7 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
       </button>
 
       <button
-        className="btn-primary flex-1 py-2 text-xs"
+        className="btn-primary w-full px-2 py-2 text-xs"
         disabled={!isConnected || !pair.isValid}
         onClick={() => setWrapOpen(true)}
         title={!pair.isValid ? 'This pair is revoked' : disabledTitle ?? 'Wrap into the confidential token'}
@@ -54,7 +54,7 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
       </button>
 
       <button
-        className="btn-outline flex-1 py-2 text-xs"
+        className="btn-outline w-full px-2 py-2 text-xs"
         disabled={!isConnected || !hasConfidential}
         onClick={() => setUnwrapOpen(true)}
         title={

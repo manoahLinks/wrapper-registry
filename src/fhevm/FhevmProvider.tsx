@@ -6,12 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import {
-  initSDK,
-  createInstance,
-  SepoliaConfig,
-  type FhevmInstance,
-} from '@zama-fhe/relayer-sdk/web'
+import type { FhevmInstance } from '@zama-fhe/relayer-sdk/web'
 import { SEPOLIA_RPC_URL } from '@/config/chain'
 
 export type FhevmStatus = 'loading' | 'ready' | 'error'
@@ -35,6 +30,10 @@ const FALLBACK_RPC = 'https://ethereum-sepolia-rpc.publicnode.com'
 let instancePromise: Promise<FhevmInstance> | null = null
 
 async function buildInstance(): Promise<FhevmInstance> {
+  // Dynamically import the (large, WASM-bearing) relayer SDK so it ships as a
+  // separate chunk instead of bloating the initial bundle.
+  const { initSDK, createInstance, SepoliaConfig } = await import('@zama-fhe/relayer-sdk/web')
+
   // Loads the TFHE/KMS WASM. Single-threaded by default — no SharedArrayBuffer,
   // so no cross-origin-isolation (COOP/COEP) headers are required to deploy.
   await initSDK()
