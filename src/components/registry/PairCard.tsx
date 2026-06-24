@@ -113,7 +113,7 @@ export function PairCard({ pair, balances, isConnected, onRefresh, style }: Pair
 
       {/* Spacer pushes actions to the bottom for equal-height cards */}
       <div className="flex-1" />
-      <PairActions pair={pair} onRefresh={onRefresh} />
+      <PairActions pair={pair} balances={balances} onRefresh={onRefresh} />
     </div>
   )
 }

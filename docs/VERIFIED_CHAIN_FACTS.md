@@ -99,10 +99,24 @@ Symbols/decimals/names are read at runtime from each token (do NOT hardcode — 
   - Verifies KMS signatures (reverts `InvalidKMSSignatures`); on success releases underlying ERC-20.
   - Emits `UnwrapFinalized(address indexed receiver, bytes32 indexed unwrapRequestId, euint64 encryptedAmount, uint64 cleartextAmount)`.
 - Helpers: `unwrapAmount(bytes32 id) → euint64`, `unwrapRequester(bytes32 id) → address`.
-- ⚠️ OPEN ITEM (resolve in Phase 6): confirm WHO submits `finalizeUnwrap` — Zama decryption
-  oracle auto-callback (most likely; user just waits for `UnwrapFinalized`) vs. our frontend
-  driving tx2 from a relayer `publicDecrypt` proof. Verify by tracing a real
-  UnwrapRequested→UnwrapFinalized pair on Sepolia before building the UX.
+- ✅ RESOLVED (Phase 6, from V3 source `ERC7984ERC20WrapperUpgradeable`): there is **no oracle
+  auto-callback**. `_unwrap` burns the amount, calls `FHE.makePubliclyDecryptable(burnedAmount)`,
+  and stores the request. The **frontend must drive `finalizeUnwrap`** using the relayer's
+  PUBLIC decryption. Key facts:
+  - `unwrapRequestId` **IS** the burned-amount ciphertext handle (`euint64.unwrap(burned)`),
+    emitted as the indexed `unwrapRequestId` in `UnwrapRequested(to, unwrapRequestId, amount)`.
+  - `_burn` caps at the user's balance and returns the ACTUAL burned amount → over-requesting
+    is safe (unwraps exactly what you hold). Sending `uint64.max` = "unwrap everything".
+  - Self-unwrap (`from == msg.sender`) needs NO operator/approval when using the
+    `unwrap(from,to,externalEuint64,inputProof)` variant (the input proof authorizes use).
+  - `finalizeUnwrap(id, cleartext, proof)` runs `FHE.checkSignatures` then sends
+    `cleartext * rate` underlying ERC-20 to the stored recipient. Permissionless to call.
+  - SDK 0.4.1 `instance.publicDecrypt([handle])` → `{ clearValues: {[handle]: bigint},
+    abiEncodedClearValues, decryptionProof }`. Pass `clearValues[id]` as cleartext and
+    `decryptionProof` straight into `finalizeUnwrap`. publicDecrypt is permissionless (no EIP-712).
+  - FLOW (3 steps): encrypt amount client-side → `unwrap(...)` tx1 → `publicDecrypt(id)` (retry
+    until relayer indexes tx1) → `finalizeUnwrap(...)` tx2. No live example existed on-chain to
+    trace (zero unwrap events chain-wide), so this is sourced from the verified V3 contract.
 
 ### ACL / operator
 - `setOperator(address operator, uint48 until)` — time-bounded operator approval.
