@@ -1,6 +1,6 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { BrandMark } from './BrandMark'
 import { FhevmStatusPill } from './FhevmStatusPill'
+import { WalletButton } from './WalletButton'
 
 import { REPO_URL } from '@/config/app'
 
@@ -36,11 +36,7 @@ export function Header() {
           <span className="hidden sm:inline-flex">
             <FhevmStatusPill />
           </span>
-          <ConnectButton
-            showBalance={false}
-            accountStatus={{ smallScreen: 'avatar', largeScreen: 'full' }}
-            chainStatus="icon"
-          />
+          <WalletButton />
         </div>
       </div>
     </header>

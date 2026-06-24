@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAccount, useReadContracts } from 'wagmi'
 import { isAddress, type Address, type Hex } from 'viem'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { WalletButton } from '@/components/WalletButton'
 import { wrapperAbi } from '@/abi/wrapper'
 import { ConfidentialBalance } from '@/components/ConfidentialBalance'
 import { TokenGlyph } from '@/components/ui/TokenGlyph'
@@ -83,7 +83,7 @@ export function DecryptPanel() {
           {status === 'connect' && (
             <div className="flex items-center justify-between gap-3 rounded-card bg-white/5 p-3">
               <span className="text-sm text-white/60">Connect your wallet to decrypt your balance.</span>
-              <ConnectButton showBalance={false} chainStatus="none" accountStatus="address" />
+              <WalletButton onDark />
             </div>
           )}
           {status === 'loading' && <p className="text-sm text-white/50">Reading token…</p>}
