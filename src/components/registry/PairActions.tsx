@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAccount } from 'wagmi'
+import { useActiveChain } from '@/hooks/useActiveChain'
 import { FaucetDialog } from '@/components/actions/FaucetDialog'
 import { WrapDialog } from '@/components/actions/WrapDialog'
 import { UnwrapDialog } from '@/components/actions/UnwrapDialog'
@@ -19,6 +20,7 @@ interface PairActionsProps {
  */
 export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
   const { isConnected } = useAccount()
+  const { config } = useActiveChain()
   const [faucetOpen, setFaucetOpen] = useState(false)
   const [wrapOpen, setWrapOpen] = useState(false)
   const [unwrapOpen, setUnwrapOpen] = useState(false)
@@ -26,20 +28,27 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
   const disabledTitle = isConnected ? undefined : 'Connect a wallet first'
   const hasConfidential = balances?.hasConfidential ?? false
 
+  // The mintable faucet only exists on testnets (mock ERC-20s). On mainnet the
+  // underlying tokens are real, so we drop the column and widen the rest.
+  const showFaucet = config.hasFaucet
+  const gridCols = showFaucet ? 'grid-cols-3' : 'grid-cols-2'
+
   return (
-    <div className="mt-3.5 grid grid-cols-3 gap-2 border-t border-line pt-3">
-      <button
-        className="btn-outline w-full px-2 py-2 text-xs"
-        disabled={!isConnected}
-        onClick={() => setFaucetOpen(true)}
-        title={disabledTitle ?? 'Claim test tokens'}
-      >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 2v6m0 0 3-3m-3 3L9 5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M5 13h14l-1.5 7.5a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5L5 13Z" strokeLinejoin="round" />
-        </svg>
-        Faucet
-      </button>
+    <div className={`mt-3.5 grid ${gridCols} gap-2 border-t border-line pt-3`}>
+      {showFaucet && (
+        <button
+          className="btn-outline w-full px-2 py-2 text-xs"
+          disabled={!isConnected}
+          onClick={() => setFaucetOpen(true)}
+          title={disabledTitle ?? 'Claim test tokens'}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v6m0 0 3-3m-3 3L9 5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M5 13h14l-1.5 7.5a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5L5 13Z" strokeLinejoin="round" />
+          </svg>
+          Faucet
+        </button>
+      )}
 
       <button
         className="btn-primary w-full px-2 py-2 text-xs"

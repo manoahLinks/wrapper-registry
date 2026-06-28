@@ -1,9 +1,10 @@
+import { useChainId } from 'wagmi'
 import { Header } from './components/Header'
 import { NetworkBanner } from './components/NetworkBanner'
 import { BrandMark } from './components/BrandMark'
 import { RegistryGrid } from './components/registry/RegistryGrid'
 import { DecryptPanel } from './components/decrypt/DecryptPanel'
-import { REPO_URL, ZAMA_DOCS_URL, REGISTRY_EXPLORER_URL } from './config/app'
+import { REPO_URL, ZAMA_DOCS_URL, registryExplorerUrl } from './config/app'
 
 function Hero() {
   return (
@@ -13,7 +14,7 @@ function Hero() {
         <div className="animate-fade-up max-w-3xl">
           <div className="pill mb-6 border-zama-yellow/60 bg-zama-soft-yellow">
             <span className="h-1.5 w-1.5 rounded-full bg-zama-yellow" />
-            Official Zama Confidential Wrappers · Sepolia
+            Official Zama Confidential Wrappers · Sepolia &amp; Mainnet
           </div>
           <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tight text-ink sm:text-6xl">
             Confidential tokens,
@@ -43,10 +44,11 @@ function Hero() {
 }
 
 function Footer() {
+  const chainId = useChainId()
   const links = [
     { label: 'Source', href: REPO_URL },
     { label: 'Registry docs', href: ZAMA_DOCS_URL },
-    { label: 'Registry contract', href: REGISTRY_EXPLORER_URL },
+    { label: 'Registry contract', href: registryExplorerUrl(chainId) },
   ]
   return (
     <footer className="mt-8 border-t border-line">
@@ -68,7 +70,7 @@ function Footer() {
       </div>
       <div className="mx-auto max-w-6xl px-5 pb-8">
         <p className="text-xs text-ink-faint">
-          Built on the official Zama Wrappers Registry · Not affiliated with Zama · Sepolia testnet
+          Built on the official Zama Wrappers Registry · Not affiliated with Zama · Sepolia &amp; Ethereum mainnet
         </p>
       </div>
     </footer>

@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useChainId } from 'wagmi'
 import { explorerTx } from '@/lib/format'
 
 export type ToastKind = 'success' | 'error' | 'info' | 'pending'
@@ -99,6 +100,7 @@ const TONES: Record<ToastKind, string> = {
 }
 
 function ToastViewport({ items, dismiss }: { items: ToastItem[]; dismiss: (id: number) => void }) {
+  const chainId = useChainId()
   return (
     <div className="pointer-events-none fixed bottom-0 right-0 z-[60] flex w-full max-w-sm flex-col gap-2 p-4">
       {items.map((t) => (
@@ -115,12 +117,12 @@ function ToastViewport({ items, dismiss }: { items: ToastItem[]; dismiss: (id: n
               )}
               {t.txHash && (
                 <a
-                  href={explorerTx(t.txHash)}
+                  href={explorerTx(t.txHash, chainId)}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-1 inline-block text-xs font-medium text-ink underline underline-offset-2 hover:text-zama-orange"
                 >
-                  View on Etherscan ↗
+                  View on explorer ↗
                 </a>
               )}
             </div>

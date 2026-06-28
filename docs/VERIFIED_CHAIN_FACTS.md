@@ -152,3 +152,51 @@ Verified on cUSDC underlying `0x9b5Cd13b…` (all mocks share this shape):
 Open items intentionally deferred (not blockers):
 - finalizeUnwrap submitter (→ P6, verify via real tx trace).
 - Pair #8 symbol + per-token decimals/symbols (→ read at runtime / seed in P3 config).
+
+---
+
+# Verified Ethereum MAINNET Chain Facts (chain `1`)
+
+> Added 2026-06-28. Registry verified on-chain via Blockscout (mainnet `1`).
+> Wrapper pairs + relayer config from Zama's official addresses doc + the
+> installed `@zama-fhe/relayer-sdk@0.4.1` presets. App reads pairs at runtime, so
+> per-token addresses are not hardcoded — the registry address is the only pin.
+
+## M1. Wrappers Registry (mainnet)
+
+- **Proxy (call this):** `0xeb5015fF021DB115aCe010f23F55C2591059bBA0`
+  - On-chain: ERC1967 proxy, `is_verified=true`, deployed 2025-12-26. Same
+    `ConfidentialTokenWrappersRegistry` contract family as Sepolia.
+  - **Implementation:** `0xA989D32d7348e0Da8145C6282E839dfC4DB8954f`
+- ABI is identical to Sepolia → `src/abi/registry.ts` works unchanged.
+
+## M2. Registered pairs (from Zama official addresses doc — verify at runtime)
+
+| # | Symbol | Underlying ERC-20 | Confidential ERC-7984 wrapper |
+|---|---|---|---|
+| 1 | cUSDC      | `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` | `0xe978F22157048E5DB8E5d07971376e86671672B2` |
+| 2 | cUSDT      | `0xdAC17F958D2ee523a2206206994597C13D831ec7` | `0xAe0207C757Aa2B4019Ad96edD0092ddc63EF0c50` |
+| 3 | cWETH      | `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2` | `0xda9396b82634Ea99243cE51258B6A5Ae512D4893` |
+| 4 | cBRON      | `0xBA2C598E11eD093079cC324FCa5BbbA99F616E83` | `0x85dE671c3bec1aDeD752c3Cea943521181C826bc` |
+| 5 | cZAMA      | `0xA12CC123ba206d4031D1c7f6223D1C2Ec249f4f3` | `0x80CB147Fd86dC6dEe3Eee7e4Cee33d1397d98071` |
+| 6 | ctGBP      | `0x27f6c8289550fce67f6b50bed1f519966afe5287` | `0xa873750ccBafD5ec7Dd13bfD5237d7129832eDD9` |
+| 7 | cXAUt      | `0x68749665FF8D2d112Fa859AA293F07A622782F38` | `0x73cc9aF9d6BEFdb3c3fAf8a5E8c05Cb95FdaEEf1` |
+| 8 | cbbqTGBP   | `0xbeeffABcd0dB09589Dd21854aa760C52aB4bf04F` | `0xBA4cFF6ED6F7Cb2A58776dECa4E984b498446762` |
+| 9 | csteakcUSDC| `0xbEEF00A59B577423653A1526c7009bdE103F542B` | `0x66Bf74E96900D1a19c7070D939D124f2F565C458` |
+
+> NOTE: these are REAL tokens (real USDC/USDT/WETH + yield vaults). There is **no
+> faucet** on mainnet — `ChainConfig.hasFaucet=false` hides the faucet action.
+
+## M3. FHEVM relayer (mainnet) — needs an API key
+
+- From `@zama-fhe/relayer-sdk@0.4.1` `MainnetConfig`:
+  - chainId `1`, gatewayChainId `261131`
+  - relayerUrl `https://relayer.mainnet.zama.org`, default route version **2**
+- Mainnet relayer requires auth: `auth: { __type: 'ApiKeyHeader', value: KEY }`
+  → HTTP header **`x-api-key`**. Key must NOT ship in the browser.
+- **Our solution:** SDK `relayerUrl` is overridden to same-origin `/api/relayer/v2`;
+  the Vercel Edge function `api/relayer/[...path].ts` strips `/api/relayer` and
+  forwards to `https://relayer.mainnet.zama.org/*` with `x-api-key` injected from
+  the server-side `RELAYER_API_KEY` env var. SDK endpoints hit
+  `{relayerUrl}/keyurl|input-proof|user-decrypt|public-decrypt`.
+- Sepolia relayer is keyless + CORS-open → no proxy, SDK default URL used.

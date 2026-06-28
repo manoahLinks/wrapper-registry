@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useChainId } from 'wagmi'
 import { toHex } from 'viem'
 import { Modal } from '@/components/ui/Modal'
 import { AmountField } from '@/components/ui/AmountField'
@@ -12,7 +12,6 @@ import { formatAmount } from '@/lib/format'
 import { safeParseUnits } from '@/lib/amount'
 import { parseUnwrapRequestId, publicDecryptWithRetry, UINT64_MAX } from '@/lib/unwrap'
 import { wrapperAbi } from '@/abi/wrapper'
-import { APP_CHAIN_ID } from '@/config/chain'
 import type { EnrichedPair } from '@/types'
 import type { PairBalances } from '@/hooks/useUserBalances'
 
@@ -36,6 +35,7 @@ interface UnwrapDialogProps {
 
 export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: UnwrapDialogProps) {
   const { address } = useAccount()
+  const chainId = useChainId()
   const { instance, status: fhevmStatus } = useFhevm()
   const { run } = useTxRunner()
   const toast = useToast()
@@ -92,7 +92,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
         abi: wrapperAbi,
         functionName: 'unwrap',
         args: [address, address, toHex(enc.handles[0]), toHex(enc.inputProof)],
-        chainId: APP_CHAIN_ID,
+        chainId,
       })
       const requestId = parseUnwrapRequestId(receipt)
       if (!requestId) throw new Error('Could not read the unwrap request id from the transaction.')
@@ -108,7 +108,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
         abi: wrapperAbi,
         functionName: 'finalizeUnwrap',
         args: [requestId, cleartext, decryptionProof],
-        chainId: APP_CHAIN_ID,
+        chainId,
       })
 
       const releasedErc20 = cleartext * rate

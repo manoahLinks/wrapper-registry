@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useAccount, useReadContracts } from 'wagmi'
+import { useAccount, useChainId, useReadContracts } from 'wagmi'
 import { Modal } from '@/components/ui/Modal'
 import { AmountField } from '@/components/ui/AmountField'
 import { TokenGlyph } from '@/components/ui/TokenGlyph'
@@ -8,7 +8,6 @@ import { useToast } from '@/components/ui/Toast'
 import { parseTxError } from '@/lib/errors'
 import { erc20Abi } from '@/abi/erc20'
 import { wrapperAbi } from '@/abi/wrapper'
-import { APP_CHAIN_ID } from '@/config/chain'
 import { safeParseUnits, formatUnits, wrapPreview } from '@/lib/amount'
 import { formatAmount } from '@/lib/format'
 import type { EnrichedPair } from '@/types'
@@ -22,6 +21,7 @@ interface WrapDialogProps {
 
 export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) {
   const { address } = useAccount()
+  const chainId = useChainId()
   const { run, isBusy } = useTxRunner()
   const toast = useToast()
   const [amount, setAmount] = useState('')
@@ -72,7 +72,7 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
           abi: erc20Abi,
           functionName: 'approve',
           args: [conf.address, amountRaw],
-          chainId: APP_CHAIN_ID,
+          chainId,
         })
         toast.update(id, { kind: 'success', title: `${erc20.symbol} approved`, txHash: hash })
       } catch (e) {
@@ -92,7 +92,7 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
         abi: wrapperAbi,
         functionName: 'wrap',
         args: [address, amountRaw],
-        chainId: APP_CHAIN_ID,
+        chainId,
       })
       toast.update(id, {
         kind: 'success',

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useReadContract, useReadContracts } from 'wagmi'
 import type { Address } from 'viem'
-import { REGISTRY_ADDRESS } from '@/config/chain'
+import { useActiveChain } from '@/hooks/useActiveChain'
 import { registryAbi } from '@/abi/registry'
 import { erc20Abi } from '@/abi/erc20'
 import { wrapperAbi } from '@/abi/wrapper'
@@ -29,15 +29,19 @@ interface UseRegistryPairsResult {
  * (the registry is known to contain odd entries) never breaks the grid.
  */
 export function useRegistryPairs(): UseRegistryPairsResult {
+  const { chainId, registryAddress, isSupported } = useActiveChain()
+
   const {
     data: onchain,
     isLoading: pairsLoading,
     isError: pairsError,
     refetch,
   } = useReadContract({
-    address: REGISTRY_ADDRESS,
+    address: registryAddress,
     abi: registryAbi,
     functionName: 'getTokenConfidentialTokenPairs',
+    chainId,
+    query: { enabled: isSupported },
   })
 
   // 1 + 2: merge on-chain (primary) with local pairs, deduped by wrapper address.
@@ -77,21 +81,21 @@ export function useRegistryPairs(): UseRegistryPairsResult {
   const metaContracts = useMemo(
     () =>
       basePairs.flatMap((p) => [
-        { address: p.erc20, abi: erc20Abi, functionName: 'symbol' },
-        { address: p.erc20, abi: erc20Abi, functionName: 'name' },
-        { address: p.erc20, abi: erc20Abi, functionName: 'decimals' },
-        { address: p.confidential, abi: wrapperAbi, functionName: 'symbol' },
-        { address: p.confidential, abi: wrapperAbi, functionName: 'name' },
-        { address: p.confidential, abi: wrapperAbi, functionName: 'decimals' },
-        { address: p.confidential, abi: wrapperAbi, functionName: 'rate' },
+        { address: p.erc20, abi: erc20Abi, functionName: 'symbol', chainId },
+        { address: p.erc20, abi: erc20Abi, functionName: 'name', chainId },
+        { address: p.erc20, abi: erc20Abi, functionName: 'decimals', chainId },
+        { address: p.confidential, abi: wrapperAbi, functionName: 'symbol', chainId },
+        { address: p.confidential, abi: wrapperAbi, functionName: 'name', chainId },
+        { address: p.confidential, abi: wrapperAbi, functionName: 'decimals', chainId },
+        { address: p.confidential, abi: wrapperAbi, functionName: 'rate', chainId },
       ]),
-    [basePairs],
+    [basePairs, chainId],
   )
 
   const { data: metaData, isLoading: metaLoading } = useReadContracts({
     contracts: metaContracts,
     allowFailure: true,
-    query: { enabled: basePairs.length > 0 },
+    query: { enabled: isSupported && basePairs.length > 0 },
   })
 
   const pairs = useMemo<EnrichedPair[]>(() => {

@@ -6,13 +6,14 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useChainId } from 'wagmi'
 import type { FhevmInstance } from '@zama-fhe/relayer-sdk/web'
-import { SEPOLIA_RPC_URL } from '@/config/chain'
+import { getChainConfig, isSupportedChain } from '@/config/chain'
 
 export type FhevmStatus = 'loading' | 'ready' | 'error'
 
 interface FhevmContextValue {
-  /** The relayer SDK instance, or null until ready. */
+  /** The relayer SDK instance for the active chain, or null until ready. */
   instance: FhevmInstance | null
   status: FhevmStatus
   error: string | null
@@ -22,35 +23,52 @@ interface FhevmContextValue {
 
 const FhevmContext = createContext<FhevmContextValue | undefined>(undefined)
 
-// Public Sepolia RPC used only for the SDK's own chain reads when no key is set.
-const FALLBACK_RPC = 'https://ethereum-sepolia-rpc.publicnode.com'
+// One singleton instance per chainId: switching networks builds (and caches) a
+// fresh instance bound to that chain's KMS/relayer config rather than reusing a
+// stale one. StrictMode's double-mount still shares a single expensive init.
+const instanceByChain = new Map<number, Promise<FhevmInstance>>()
 
-// Module-level singleton so React StrictMode's double-mount (and any remounts)
-// reuse a single, expensive WASM init + KMS parameter fetch.
-let instancePromise: Promise<FhevmInstance> | null = null
+async function buildInstance(chainId: number): Promise<FhevmInstance> {
+  const cfg = getChainConfig(chainId)
+  if (!cfg) throw new Error(`Unsupported network (chainId ${chainId}).`)
 
-async function buildInstance(): Promise<FhevmInstance> {
   // Dynamically import the (large, WASM-bearing) relayer SDK so it ships as a
   // separate chunk instead of bloating the initial bundle.
-  const { initSDK, createInstance, SepoliaConfig } = await import('@zama-fhe/relayer-sdk/web')
+  const sdk = await import('@zama-fhe/relayer-sdk/web')
 
   // Loads the TFHE/KMS WASM. Single-threaded by default — no SharedArrayBuffer,
   // so no cross-origin-isolation (COOP/COEP) headers are required to deploy.
-  await initSDK()
+  await sdk.initSDK()
+
+  const preset = cfg.preset === 'mainnet' ? sdk.MainnetConfig : sdk.SepoliaConfig
 
   // A string RPC keeps instance creation independent of the connected wallet;
   // signing for user-decryption happens separately via the wallet (wagmi).
-  const network = SEPOLIA_RPC_URL || FALLBACK_RPC
+  const network = cfg.rpcUrl || cfg.fallbackRpcUrl
 
-  return createInstance({ ...SepoliaConfig, network })
+  const config: Parameters<typeof sdk.createInstance>[0] = { ...preset, network }
+
+  // On chains that require an API key (mainnet), route relayer calls through our
+  // own same-origin proxy, which injects the key server-side. No key in the
+  // browser. The SDK needs an absolute, parseable URL here.
+  if (cfg.relayerProxyPath) {
+    config.relayerUrl = new URL(cfg.relayerProxyPath, window.location.origin).toString()
+  }
+
+  return sdk.createInstance(config)
 }
 
-function getInstance(): Promise<FhevmInstance> {
-  if (!instancePromise) instancePromise = buildInstance()
-  return instancePromise
+function getInstance(chainId: number): Promise<FhevmInstance> {
+  let promise = instanceByChain.get(chainId)
+  if (!promise) {
+    promise = buildInstance(chainId)
+    instanceByChain.set(chainId, promise)
+  }
+  return promise
 }
 
 export function FhevmProvider({ children }: { children: ReactNode }) {
+  const chainId = useChainId()
   const [instance, setInstance] = useState<FhevmInstance | null>(null)
   const [status, setStatus] = useState<FhevmStatus>('loading')
   const [error, setError] = useState<string | null>(null)
@@ -58,10 +76,23 @@ export function FhevmProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false
+
+    // Drop any instance from the previous chain so consumers never decrypt
+    // against the wrong network mid-switch.
+    setInstance(null)
+
+    if (!isSupportedChain(chainId)) {
+      setStatus('error')
+      setError(
+        'Unsupported network. Switch to Sepolia or Ethereum mainnet to use confidential features.',
+      )
+      return
+    }
+
     setStatus('loading')
     setError(null)
 
-    getInstance()
+    getInstance(chainId)
       .then((inst) => {
         if (cancelled) return
         setInstance(inst)
@@ -69,7 +100,7 @@ export function FhevmProvider({ children }: { children: ReactNode }) {
       })
       .catch((e: unknown) => {
         if (cancelled) return
-        instancePromise = null // clear so retry rebuilds
+        instanceByChain.delete(chainId) // clear so retry rebuilds
         setError(e instanceof Error ? e.message : 'Failed to initialize the FHEVM relayer')
         setStatus('error')
       })
@@ -77,7 +108,7 @@ export function FhevmProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [reloadKey])
+  }, [chainId, reloadKey])
 
   const value = useMemo<FhevmContextValue>(
     () => ({

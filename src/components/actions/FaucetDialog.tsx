@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useChainId } from 'wagmi'
 import { parseUnits } from 'viem'
 import { Modal } from '@/components/ui/Modal'
 import { AmountField } from '@/components/ui/AmountField'
@@ -8,7 +8,6 @@ import { useTxRunner } from '@/hooks/useTxRunner'
 import { useToast } from '@/components/ui/Toast'
 import { parseTxError } from '@/lib/errors'
 import { erc20Abi } from '@/abi/erc20'
-import { APP_CHAIN_ID } from '@/config/chain'
 import type { EnrichedPair } from '@/types'
 
 /** Per-claim cap enforced by the mock ERC-20 (`MAX_MINT_AMOUNT_TOKENS`). */
@@ -23,6 +22,7 @@ interface FaucetDialogProps {
 
 export function FaucetDialog({ pair, open, onClose, onSuccess }: FaucetDialogProps) {
   const { address } = useAccount()
+  const chainId = useChainId()
   const { run, isBusy } = useTxRunner()
   const toast = useToast()
   const [amount, setAmount] = useState('1000')
@@ -46,7 +46,7 @@ export function FaucetDialog({ pair, open, onClose, onSuccess }: FaucetDialogPro
         abi: erc20Abi,
         functionName: 'mint',
         args: [address, raw],
-        chainId: APP_CHAIN_ID,
+        chainId,
       })
       toast.update(toastId, {
         kind: 'success',

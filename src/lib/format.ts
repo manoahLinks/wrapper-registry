@@ -1,5 +1,5 @@
 import { formatUnits, getAddress, type Address } from 'viem'
-import { EXPLORER_URL } from '@/config/chain'
+import { explorerUrl } from '@/config/chain'
 
 /** 0x1234…abcd */
 export function shortAddress(address: string, chars = 4): string {
@@ -16,14 +16,14 @@ export function checksum(address: string): string {
   }
 }
 
-/** Etherscan (Sepolia) link for an address or token. */
-export function explorerAddress(address: string): string {
-  return `${EXPLORER_URL}/address/${address}`
+/** Block-explorer link for an address or token on the given chain. */
+export function explorerAddress(address: string, chainId?: number): string {
+  return `${explorerUrl(chainId)}/address/${address}`
 }
 
-/** Etherscan (Sepolia) link for a transaction. */
-export function explorerTx(hash: string): string {
-  return `${EXPLORER_URL}/tx/${hash}`
+/** Block-explorer link for a transaction on the given chain. */
+export function explorerTx(hash: string, chainId?: number): string {
+  return `${explorerUrl(chainId)}/tx/${hash}`
 }
 
 /**
