@@ -20,7 +20,7 @@ export function WalletButton({ onDark = false }: WalletButtonProps) {
 
         const chip = onDark
           ? 'border-white/15 bg-white/5 text-white hover:border-white/30'
-          : 'border-line-strong bg-paper-card text-ink hover:border-ink/30'
+          : 'border-line bg-paper-card text-ink hover:border-ink'
 
         return (
           <div
@@ -51,7 +51,7 @@ export function WalletButton({ onDark = false }: WalletButtonProps) {
                 {/* Network selector */}
                 <button
                   onClick={openChainModal}
-                  className={`inline-flex items-center gap-1.5 rounded-[10px] border px-2.5 py-2 text-sm font-medium transition-colors ${chip}`}
+                  className={`inline-flex items-center gap-1.5 rounded-[10px] border px-2.5 py-2 text-[12.5px] font-bold transition-colors ${chip}`}
                   title="Switch network"
                 >
                   {chain.hasIcon && (

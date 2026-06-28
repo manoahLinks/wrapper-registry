@@ -1,9 +1,10 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Palette is lifted verbatim from Zama's own brand stylesheet
- * (CSS custom properties such as `--zama-yellow: #ffd208`). Keeping these
- * exact makes the app read as a first-party Zama product.
+ * Neo-brutalist "Wrapper Registry" palette — warm cream paper, ink black,
+ * a single high-chroma yellow accent, hard borders and offset shadows.
+ * Token NAMES are kept stable (zama-yellow, paper, ink, line, …) so the whole
+ * component tree restyles from these values without per-class churn.
  */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -11,35 +12,37 @@ export default {
     extend: {
       colors: {
         zama: {
-          yellow: '#ffd208',
-          'yellow-press': '#e6bd00',
-          'medium-yellow': '#ffe052',
-          'light-yellow': '#fff2b5',
-          'soft-yellow': '#fffbe6',
-          orange: '#ffb243',
-          'soft-orange': '#fff7ec',
+          yellow: '#ffd000',
+          'yellow-press': '#e6bb00',
+          'medium-yellow': '#ffda33',
+          'light-yellow': '#ffe98a',
+          'soft-yellow': '#fbefc2',
+          orange: '#ff9e2c',
+          'soft-orange': '#fff3df',
         },
         ink: {
-          DEFAULT: '#111314',
-          soft: '#2e2e2e',
-          muted: '#5b6163',
-          faint: '#8a9092',
+          DEFAULT: '#0b0b0c',
+          soft: '#2e2b26',
+          muted: '#57534b',
+          faint: '#8b867a',
+          dim: '#a8a294',
         },
         paper: {
-          DEFAULT: '#f2efec',
+          DEFAULT: '#f1ece1',
           card: '#ffffff',
-          soft: '#f7f5f2',
-          sunken: '#ece8e3',
+          soft: '#f8f5ee',
+          sunken: '#ece7da',
         },
         line: {
-          DEFAULT: '#e8e4df',
-          strong: '#d9d4ce',
+          DEFAULT: '#e2dccd',
+          strong: '#d8d2c2',
+          dashed: '#b7b1a1',
         },
         state: {
-          success: '#1f9d55',
-          danger: '#d64545',
-          warn: '#ffb243',
-          info: '#2b44ff',
+          success: '#16a34a',
+          danger: '#c0392b',
+          warn: '#ffb020',
+          info: '#6b7cff',
         },
       },
       fontFamily: {
@@ -48,12 +51,17 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       borderRadius: {
-        card: '14px',
+        card: '16px',
       },
       boxShadow: {
-        card: '0 1px 2px rgba(17,19,20,0.04), 0 10px 30px -12px rgba(17,19,20,0.12)',
-        pop: '0 18px 50px -16px rgba(17,19,20,0.22)',
-        'yellow-glow': '0 8px 28px -8px rgba(255,210,8,0.55)',
+        card: '0 1px 2px rgba(28,22,8,0.04)',
+        pop: '0 12px 34px rgba(20,16,8,0.16)',
+        modal: '0 24px 60px rgba(20,14,4,0.28)',
+        lift: '0 12px 32px rgba(28,22,8,0.09)',
+        brutal: '3px 3px 0 #0b0b0c',
+        'brutal-lg': '4px 4px 0 #0b0b0c',
+        'brutal-sm': '1px 1px 0 #0b0b0c',
+        'yellow-glow': '0 8px 28px -8px rgba(255,208,0,0.55)',
       },
       keyframes: {
         'cipher-shimmer': {
@@ -64,14 +72,21 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        pop: {
+          '0%': { opacity: '0', transform: 'translateY(14px) scale(.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        scrim: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         'pulse-soft': {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.55' },
+          '50%': { opacity: '0.35' },
         },
       },
       animation: {
         'cipher-shimmer': 'cipher-shimmer 2.4s linear infinite',
-        'fade-up': 'fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both',
+        'fade-up': 'fade-up 0.45s cubic-bezier(0.22,1,0.36,1) both',
+        pop: 'pop 0.2s ease both',
+        scrim: 'scrim 0.18s ease both',
         'pulse-soft': 'pulse-soft 1.6s ease-in-out infinite',
       },
     },

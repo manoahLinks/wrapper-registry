@@ -49,7 +49,7 @@ export function DecryptPanel() {
   }, [valid, token, tokenAddress, isConnected, isLoading, isError, isErc7984])
 
   return (
-    <section id="decrypt" className="mx-auto max-w-3xl px-5 py-14">
+    <section id="decrypt" className="mx-auto max-w-3xl py-14">
       <div className="surface-cipher overflow-hidden p-6 sm:p-8">
         <div className="mb-1.5 flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffd208">

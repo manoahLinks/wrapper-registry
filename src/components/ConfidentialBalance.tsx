@@ -1,9 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Hex } from 'viem'
 import { useDecryption } from '@/fhevm/DecryptionProvider'
 import { useToast } from '@/components/ui/Toast'
 import { parseTxError } from '@/lib/errors'
 import { formatAmount } from '@/lib/format'
+
+const HEX = '0123456789abcdef'
+/** A random ciphertext-looking token, e.g. "7f3a··c2e1". */
+function randCipher(): string {
+  const r = (n: number) => Array.from({ length: n }, () => HEX[(Math.random() * 16) | 0]).join('')
+  return `${r(4)}··${r(4)}`
+}
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 interface ConfidentialBalanceProps {
   contract: string
@@ -31,28 +40,64 @@ export function ConfidentialBalance({
   const { decrypt, getValue, isPending } = useDecryption()
   const toast = useToast()
   const [hidden, setHidden] = useState(false)
+  // Non-null while the "cracking" animation runs (during sign + decrypt).
+  const [scramble, setScramble] = useState<string | null>(null)
+  const scrambleIv = useRef<ReturnType<typeof setInterval>>()
+
+  useEffect(() => () => clearInterval(scrambleIv.current), [])
 
   const value = getValue(contract, handle)
   const pending = isPending(contract, handle)
   const text = size === 'lg' ? 'text-2xl' : 'text-sm'
+  const cipherSize = size === 'lg' ? 'text-2xl' : 'text-[14px]'
+
+  // A deterministic, ciphertext-looking preview of the encrypted handle —
+  // shown in place of the real balance until the owner decrypts it.
+  const cipher = `${handle.slice(2, 6)}··${handle.slice(-4)}`
 
   if (!hasBalance) {
     return <span className={`tabular font-mono ${text} text-ink`}>0 {size === 'lg' ? symbol : ''}</span>
   }
 
   async function reveal() {
+    const reduced = prefersReducedMotion()
+    // Kick off the "cracking" scramble immediately so it covers the wallet
+    // signature prompt and the relayer round-trip.
+    if (!reduced) {
+      setScramble(randCipher())
+      scrambleIv.current = setInterval(() => setScramble(randCipher()), 55)
+    } else {
+      setScramble('decrypting…')
+    }
     try {
       await decrypt(contract, handle)
+      // A short dramatic beat so the resolve always reads as "decrypting".
+      if (!reduced) await new Promise((r) => setTimeout(r, 650))
       setHidden(false)
     } catch (e) {
       toast.push({ kind: 'error', title: 'Decryption failed', description: parseTxError(e) })
+    } finally {
+      clearInterval(scrambleIv.current)
+      setScramble(null)
     }
+  }
+
+  // Active decryption — the ciphertext "cracks" before the value lands.
+  if (scramble !== null) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <span className={`font-mono font-bold tracking-[0.04em] text-ink ${cipherSize}`}>{scramble}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin text-zama-orange">
+          <path d="M21 12a9 9 0 1 1-6.2-8.6" strokeLinecap="round" />
+        </svg>
+      </span>
+    )
   }
 
   // Decrypted and visible.
   if (value !== undefined && !hidden) {
     return (
-      <span className="inline-flex items-center gap-1.5">
+      <span className="inline-flex animate-fade-up items-center gap-1.5">
         <span className={`tabular font-mono font-semibold ${text} text-ink`}>
           {formatAmount(value, decimals)} {size === 'lg' ? symbol : ''}
         </span>
@@ -74,8 +119,8 @@ export function ConfidentialBalance({
   // Decrypted but hidden — reveal instantly from cache.
   if (value !== undefined && hidden) {
     return (
-      <button onClick={() => setHidden(false)} className="inline-flex items-center gap-1.5 group" title="Show">
-        <span className={`cipher-text font-mono font-semibold tracking-widest ${text}`}>••••••</span>
+      <button onClick={() => setHidden(false)} className="group inline-flex items-center gap-2" title="Show">
+        <span className={`font-mono font-medium tracking-[0.04em] text-ink-dim ${cipherSize}`}>{cipher}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink-faint group-hover:text-ink">
           <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
           <circle cx="12" cy="12" r="3" />
@@ -89,16 +134,21 @@ export function ConfidentialBalance({
     <button
       onClick={reveal}
       disabled={pending}
-      className="inline-flex items-center gap-1.5 group disabled:opacity-70"
+      className="group inline-flex items-center gap-2 disabled:opacity-70"
       title="Decrypt your balance (signature required)"
     >
-      <span className={`cipher-text font-mono font-semibold tracking-widest ${text}`}>••••••</span>
+      <span
+        className={`font-mono font-medium tracking-[0.04em] text-ink-dim ${cipherSize}`}
+        title="Encrypted on-chain"
+      >
+        {cipher}
+      </span>
       {pending ? (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin text-zama-orange">
           <path d="M21 12a9 9 0 1 1-6.2-8.6" strokeLinecap="round" />
         </svg>
       ) : (
-        <span className="rounded-md bg-ink px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-zama-yellow group-hover:bg-ink-soft">
+        <span className="rounded-md border border-ink bg-zama-yellow px-2 py-0.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.08em] text-ink group-hover:bg-zama-medium-yellow">
           Reveal
         </span>
       )}

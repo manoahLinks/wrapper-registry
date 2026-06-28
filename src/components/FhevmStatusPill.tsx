@@ -27,9 +27,10 @@ export function FhevmStatusPill() {
       title={loading ? 'Loading the FHE encryption engine…' : 'FHE encryption engine ready'}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full ${
+        className={`h-[7px] w-[7px] rounded-full ${
           loading ? 'animate-pulse-soft bg-zama-orange' : 'bg-state-success'
         }`}
+        style={loading ? undefined : { boxShadow: '0 0 0 3px rgba(22,163,74,.16)' }}
       />
       {loading ? 'Encryption…' : 'Encryption ready'}
     </span>

@@ -31,8 +31,8 @@ export function AmountField({
   return (
     <div>
       <div
-        className={`flex items-center gap-2 rounded-[12px] border bg-paper-soft px-3.5 py-3 transition-colors focus-within:border-ink/30 ${
-          disabled ? 'border-line opacity-60' : 'border-line-strong'
+        className={`flex items-center gap-2.5 rounded-[12px] border bg-paper-soft px-3.5 py-3.5 transition-colors focus-within:border-ink ${
+          disabled ? 'border-line opacity-60' : 'border-line'
         }`}
       >
         <input
@@ -42,19 +42,19 @@ export function AmountField({
           value={value}
           onChange={(e) => sanitize(e.target.value)}
           placeholder="0.0"
-          className="tabular w-full bg-transparent font-mono text-xl text-ink outline-none placeholder:text-ink-faint"
+          className="tabular w-full min-w-0 bg-transparent font-mono text-[28px] font-bold text-ink outline-none placeholder:text-ink-faint"
         />
         {onMax && (
           <button
             type="button"
             onClick={onMax}
             disabled={disabled}
-            className="rounded-md bg-zama-soft-yellow px-2 py-1 text-xs font-bold uppercase tracking-wide text-ink hover:bg-zama-light-yellow"
+            className="rounded-[7px] border border-line bg-paper-card px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide text-ink hover:border-ink"
           >
             Max
           </button>
         )}
-        <span className="font-display text-sm font-bold text-ink-muted">{symbol}</span>
+        <span className="font-mono text-sm font-bold text-ink-soft">{symbol}</span>
       </div>
       {hint && <div className="mt-1.5 text-xs text-ink-muted">{hint}</div>}
     </div>

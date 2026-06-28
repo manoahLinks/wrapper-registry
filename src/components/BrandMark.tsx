@@ -5,28 +5,26 @@ interface BrandMarkProps {
 }
 
 /** The lock glyph + wordmark used in the header and footer. */
-export function BrandMark({ size = 34, withWordmark = true }: BrandMarkProps) {
+export function BrandMark({ size = 36, withWordmark = true }: BrandMarkProps) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-[11px]">
       <span
-        className="grid place-items-center rounded-[9px] bg-ink shadow-card"
+        className="grid shrink-0 place-items-center rounded-[9px] bg-ink"
         style={{ width: size, height: size }}
         aria-hidden
       >
-        <svg width={size * 0.62} height={size * 0.62} viewBox="0 0 32 32" fill="none">
-          <path
-            d="M16 6.5c-3.6 0-6.5 2.9-6.5 6.5v1.4h-.6c-.6 0-1 .5-1 1V24c0 .6.5 1 1 1h14.2c.6 0 1-.5 1-1v-8.6c0-.6-.5-1-1-1h-.6V13c0-3.6-2.9-6.5-6.5-6.5Zm3.3 7.9h-6.6V13a3.3 3.3 0 0 1 6.6 0v1.4Z"
-            fill="#ffd208"
-          />
-          <circle cx="16" cy="19" r="1.9" fill="#111314" />
+        <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none">
+          <rect x="4.5" y="10.5" width="15" height="10.5" rx="2" stroke="#FFD000" strokeWidth="2" />
+          <path d="M7.5 10.5V7.5a4.5 4.5 0 0 1 9 0v3" stroke="#FFD000" strokeWidth="2" />
+          <circle cx="12" cy="15.5" r="1.6" fill="#FFD000" />
         </svg>
       </span>
       {withWordmark && (
         <div className="leading-none">
-          <div className="font-display text-[15px] font-bold tracking-tight text-ink">
+          <div className="font-display text-[15px] font-extrabold tracking-tight text-ink">
             Wrapper Registry
           </div>
-          <div className="mt-0.5 text-[11px] font-medium uppercase tracking-[0.14em] text-ink-faint">
+          <div className="mt-[3px] font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-ink-faint">
             Confidential · Zama
           </div>
         </div>
