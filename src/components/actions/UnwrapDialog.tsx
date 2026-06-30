@@ -2,16 +2,15 @@ import { useMemo, useState } from 'react'
 import { useAccount, useChainId } from 'wagmi'
 import { toHex } from 'viem'
 import { Modal } from '@/components/ui/Modal'
-import { AmountField } from '@/components/ui/AmountField'
-import { TokenGlyph } from '@/components/ui/TokenGlyph'
 import { useTxRunner } from '@/hooks/useTxRunner'
 import { useToast } from '@/components/ui/Toast'
 import { useFhevm } from '@/fhevm/FhevmProvider'
 import { parseTxError } from '@/lib/errors'
-import { formatAmount } from '@/lib/format'
+import { formatAmount, explorerTx } from '@/lib/format'
 import { safeParseUnits } from '@/lib/amount'
 import { parseUnwrapRequestId, publicDecryptWithRetry, UINT64_MAX } from '@/lib/unwrap'
 import { wrapperAbi } from '@/abi/wrapper'
+import { AmountConvert, AmountError, PrivacyNote, PendingStep, DoneStep, type Stage } from './steps'
 import type { EnrichedPair } from '@/types'
 import type { PairBalances } from '@/hooks/useUserBalances'
 
@@ -23,6 +22,12 @@ const STEP_LABEL: Record<string, string> = {
   unwrapping: 'Submit unwrap request',
   decrypting: 'Reveal amount (relayer)',
   finalizing: 'Finalize & release tokens',
+}
+const STEP_DETAIL: Record<string, string> = {
+  encrypting: 'Building the encrypted input client-side',
+  unwrapping: 'Burns the confidential balance on-chain',
+  decrypting: 'Relayer publicly decrypts the burned amount',
+  finalizing: 'Verifies the proof and releases your ERC-20',
 }
 
 interface UnwrapDialogProps {
@@ -49,6 +54,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
   const [step, setStep] = useState<Step>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [released, setReleased] = useState<bigint | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
 
   const amountRaw = useMemo(
     () => (unwrapAll ? UINT64_MAX : safeParseUnits(amount, conf.decimals)),
@@ -59,10 +65,17 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
   const ready = fhevmStatus === 'ready' && !!instance && !!address
   const invalid = !unwrapAll && amountRaw === 0n
 
+  const receiveText = unwrapAll
+    ? 'all'
+    : amountRaw > 0n
+      ? formatAmount(amountRaw * rate, erc20.decimals, 6)
+      : '0'
+
   function reset() {
     setStep('idle')
     setErrorMsg(null)
     setReleased(null)
+    setTxHash(null)
     setAmount('')
     setUnwrapAll(false)
   }
@@ -77,15 +90,14 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
     if (!instance || !address || invalid) return
     setErrorMsg(null)
     setReleased(null)
+    setTxHash(null)
 
     try {
-      // 1) Encrypt the amount to unwrap (client-side).
       setStep('encrypting')
       const input = instance.createEncryptedInput(conf.address, address)
       input.add64(amountRaw)
       const enc = await input.encrypt()
 
-      // 2) Submit the unwrap request (burns + marks publicly decryptable).
       setStep('unwrapping')
       const { receipt } = await run({
         address: conf.address,
@@ -97,11 +109,9 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
       const requestId = parseUnwrapRequestId(receipt)
       if (!requestId) throw new Error('Could not read the unwrap request id from the transaction.')
 
-      // 3) Public-decrypt the burned amount via the relayer (retry until indexed).
       setStep('decrypting')
       const { cleartext, decryptionProof } = await publicDecryptWithRetry(instance, requestId)
 
-      // 4) Finalize: verifies the proof on-chain and releases the ERC-20.
       setStep('finalizing')
       const { hash } = await run({
         address: conf.address,
@@ -113,6 +123,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
 
       const releasedErc20 = cleartext * rate
       setReleased(releasedErc20)
+      setTxHash(hash)
       setStep('done')
       toast.push({
         kind: 'success',
@@ -129,6 +140,12 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
   }
 
   const currentIndex = STEP_ORDER.indexOf(step)
+  const stages: Stage[] = STEP_ORDER.map((s, i) => ({
+    key: s,
+    title: STEP_LABEL[s],
+    detail: STEP_DETAIL[s],
+    state: step === 'done' || i < currentIndex ? 'done' : i === currentIndex ? 'active' : 'todo',
+  }))
 
   return (
     <Modal
@@ -137,130 +154,65 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
       title={`Unwrap ${conf.symbol}`}
       subtitle={`Convert confidential ${conf.symbol} back into public ${erc20.symbol}.`}
     >
-      {/* Conversion visual */}
-      <div className="mb-4 flex items-center justify-between gap-2 rounded-card bg-paper-soft p-3">
-        <div className="flex items-center gap-2">
-          <TokenGlyph symbol={conf.symbol} address={conf.address} size={32} confidential />
-          <div className="text-sm font-bold text-ink">{conf.symbol}</div>
-        </div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink-faint">
-          <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <div className="flex items-center gap-2">
-          <TokenGlyph symbol={erc20.symbol} address={erc20.address} size={32} />
-          <div className="text-sm font-bold text-ink">{erc20.symbol}</div>
-        </div>
-      </div>
-
-      {step === 'idle' || step === 'error' ? (
+      {step === 'done' ? (
+        <DoneStep
+          title={`Unwrapped to ${erc20.symbol}`}
+          sub="The public tokens have been released to your wallet."
+          reveal={released != null ? `${formatAmount(released, erc20.decimals)} ${erc20.symbol}` : undefined}
+          txHash={txHash ?? undefined}
+          txUrl={txHash ? explorerTx(txHash, chainId) : undefined}
+          onDone={close}
+        />
+      ) : busy ? (
+        <PendingStep
+          stages={stages}
+          morph={{ sym: erc20.symbol, csym: conf.symbol }}
+          foot={
+            step === 'decrypting'
+              ? 'Waiting for the relayer to reveal the burned amount…'
+              : 'Confirm each step in your wallet'
+          }
+        />
+      ) : (
         <>
-          <AmountField
+          <AmountConvert
+            fromLabel="From · confidential"
+            balanceText="encrypted"
             value={unwrapAll ? '' : amount}
-            onChange={(v) => {
+            onValue={(v) => {
               setUnwrapAll(false)
               setAmount(v)
             }}
-            symbol={conf.symbol}
+            onMax={() => setUnwrapAll(true)}
+            fromSymbol={conf.symbol}
+            toLabel="To · public"
+            receiveText={receiveText}
+            toSymbol={erc20.symbol}
             disabled={unwrapAll}
             autoFocus
-            onMax={() => setUnwrapAll(true)}
-            hint={
-              unwrapAll ? (
-                <span className="font-medium text-ink">Unwrapping your entire {conf.symbol} balance.</span>
-              ) : (
-                <>Enter an amount, or tap Max to unwrap everything. Over-requests unwrap only what you hold.</>
-              )
-            }
           />
 
+          {unwrapAll && (
+            <p className="mt-2.5 text-center text-xs font-medium text-ink-muted">
+              Unwrapping your entire {conf.symbol} balance.
+            </p>
+          )}
           {!balances?.hasConfidential && (
-            <p className="mt-2 text-xs text-state-warn">
+            <p className="mt-2.5 text-center text-xs text-state-warn">
               You don't appear to hold any {conf.symbol} yet — wrap some first.
             </p>
           )}
+          {errorMsg && <AmountError>{errorMsg}</AmountError>}
 
-          {errorMsg && (
-            <p className="mt-3 rounded-lg bg-state-danger/5 px-3 py-2 text-xs text-state-danger">
-              {errorMsg}
-            </p>
-          )}
-
-          <div className="mt-5 flex gap-2">
-            <button className="btn-ghost flex-1" onClick={close}>
-              Cancel
-            </button>
-            <button
-              className="btn-primary flex-1"
-              onClick={start}
-              disabled={invalid || !ready}
-              title={!ready ? 'Waiting for the encryption engine…' : undefined}
-            >
-              {step === 'error' ? 'Try again' : `Unwrap ${conf.symbol}`}
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Stepper */}
-          <ol className="space-y-2.5">
-            {STEP_ORDER.map((s, i) => {
-              const state =
-                step === 'done' || i < currentIndex
-                  ? 'done'
-                  : i === currentIndex
-                    ? 'active'
-                    : 'pending'
-              return (
-                <li key={s} className="flex items-center gap-3">
-                  <span
-                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                      state === 'done'
-                        ? 'bg-state-success text-white'
-                        : state === 'active'
-                          ? 'bg-zama-yellow text-ink'
-                          : 'bg-paper-sunken text-ink-faint'
-                    }`}
-                  >
-                    {state === 'done' ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : state === 'active' ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin">
-                        <path d="M21 12a9 9 0 1 1-6.2-8.6" strokeLinecap="round" />
-                      </svg>
-                    ) : (
-                      i + 1
-                    )}
-                  </span>
-                  <span className={`text-sm ${state === 'pending' ? 'text-ink-faint' : 'text-ink'}`}>
-                    {STEP_LABEL[s]}
-                  </span>
-                </li>
-              )
-            })}
-          </ol>
-
-          {step === 'done' && (
-            <div className="mt-5 rounded-card bg-state-success/[0.07] p-4 text-center">
-              <p className="text-sm font-semibold text-ink">Released to your wallet</p>
-              <p className="mt-1 font-mono text-2xl font-bold text-ink">
-                {released != null ? formatAmount(released, erc20.decimals) : '—'} {erc20.symbol}
-              </p>
-            </div>
-          )}
-
-          <div className="mt-5">
-            <button className="btn-primary w-full" onClick={close} disabled={busy}>
-              {step === 'done' ? 'Done' : busy ? 'Working…' : 'Close'}
-            </button>
-          </div>
-
-          {step === 'decrypting' && (
-            <p className="mt-3 text-center text-xs text-ink-muted">
-              Waiting for the relayer to reveal the burned amount — this can take a few seconds.
-            </p>
-          )}
+          <button
+            onClick={start}
+            disabled={invalid || !ready}
+            className="btn-primary mt-4 w-full py-3.5 text-[14.5px]"
+            title={!ready ? 'Waiting for the encryption engine…' : undefined}
+          >
+            {step === 'error' ? 'Try again' : `Unwrap ${conf.symbol}`}
+          </button>
+          <PrivacyNote>Burned confidentially, released publicly to you.</PrivacyNote>
         </>
       )}
     </Modal>
