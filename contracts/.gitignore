@@ -1,0 +1,10 @@
+node_modules
+artifacts
+cache
+types
+fhevmTemp
+deployments
+coverage
+coverage.json
+.env
+dist
