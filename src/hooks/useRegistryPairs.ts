@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useReadContract, useReadContracts } from 'wagmi'
 import type { Address } from 'viem'
 import { useActiveChain } from '@/hooks/useActiveChain'
+import { useCustomPairs } from '@/hooks/useCustomPairs'
 import { registryAbi } from '@/abi/registry'
 import { erc20Abi } from '@/abi/erc20'
 import { wrapperAbi } from '@/abi/wrapper'
@@ -16,7 +17,7 @@ interface UseRegistryPairsResult {
   isLoading: boolean
   isError: boolean
   refetch: () => void
-  counts: { total: number; registry: number; local: number; valid: number }
+  counts: { total: number; registry: number; community: number; local: number; valid: number }
 }
 
 /**
@@ -29,7 +30,9 @@ interface UseRegistryPairsResult {
  * (the registry is known to contain odd entries) never breaks the grid.
  */
 export function useRegistryPairs(): UseRegistryPairsResult {
-  const { chainId, registryAddress, isSupported } = useActiveChain()
+  const { chainId, config, registryAddress, isSupported } = useActiveChain()
+  const { customPairs } = useCustomPairs(chainId)
+  const communityRegistry = config.customRegistryAddress
 
   const {
     data: onchain,
@@ -42,6 +45,15 @@ export function useRegistryPairs(): UseRegistryPairsResult {
     functionName: 'getTokenConfidentialTokenPairs',
     chainId,
     query: { enabled: isSupported },
+  })
+
+  // Our own community registry (user-deployed pairs), read with the same ABI.
+  const { data: community, refetch: refetchCommunity } = useReadContract({
+    address: communityRegistry,
+    abi: registryAbi,
+    functionName: 'getTokenConfidentialTokenPairs',
+    chainId,
+    query: { enabled: isSupported && !!communityRegistry },
   })
 
   // 1 + 2: merge on-chain (primary) with local pairs, deduped by wrapper address.
@@ -61,6 +73,19 @@ export function useRegistryPairs(): UseRegistryPairsResult {
       })
     }
 
+    // Community registry (our own on-chain registry of user-deployed pairs).
+    for (const p of community ?? []) {
+      const key = p.confidentialTokenAddress.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({
+        erc20: p.tokenAddress,
+        confidential: p.confidentialTokenAddress,
+        isValid: p.isValid,
+        source: 'community',
+      })
+    }
+
     for (const lp of LOCAL_PAIRS) {
       const key = lp.confidential.toLowerCase()
       if (seen.has(key)) continue
@@ -74,8 +99,23 @@ export function useRegistryPairs(): UseRegistryPairsResult {
       })
     }
 
+    // User-added pairs (browser-saved). On-chain / config entries win on conflict.
+    for (const cp of customPairs) {
+      const key = cp.confidential.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({
+        erc20: cp.erc20,
+        confidential: cp.confidential,
+        isValid: true,
+        source: 'local',
+        label: cp.label,
+        custom: true,
+      })
+    }
+
     return out
-  }, [onchain])
+  }, [onchain, community, customPairs])
 
   // 3: one multicall for all token metadata (7 reads per pair).
   const metaContracts = useMemo(
@@ -139,6 +179,7 @@ export function useRegistryPairs(): UseRegistryPairsResult {
     () => ({
       total: pairs.length,
       registry: pairs.filter((p) => p.source === 'registry').length,
+      community: pairs.filter((p) => p.source === 'community').length,
       local: pairs.filter((p) => p.source === 'local').length,
       valid: pairs.filter((p) => p.isValid).length,
     }),
@@ -149,7 +190,10 @@ export function useRegistryPairs(): UseRegistryPairsResult {
     pairs,
     isLoading: pairsLoading || (metaLoading && basePairs.length > 0),
     isError: pairsError,
-    refetch: () => void refetch(),
+    refetch: () => {
+      void refetch()
+      void refetchCommunity()
+    },
     counts,
   }
 }

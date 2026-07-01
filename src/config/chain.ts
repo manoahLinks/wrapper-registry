@@ -30,6 +30,17 @@ export interface ChainConfig {
    * testnets — you cannot mint real USDC/WETH on mainnet.
    */
   hasFaucet: boolean
+  /**
+   * Our own community WrapperRegistry (deployed via contracts/). Read alongside
+   * Zama's registry so user-deployed pairs are visible to everyone. Undefined
+   * until deployed → the community read is skipped.
+   */
+  customRegistryAddress?: `0x${string}`
+  /**
+   * Our ConfidentialWrapperFactory. Enables the in-UI "Deploy a wrapper" flow.
+   * Undefined until deployed → the deploy button is hidden.
+   */
+  factoryAddress?: `0x${string}`
 }
 
 const SEPOLIA_RPC_URL = import.meta.env.VITE_SEPOLIA_RPC_URL as string | undefined
@@ -44,6 +55,9 @@ export const SUPPORTED_CHAINS: Record<number, ChainConfig> = {
     preset: 'sepolia',
     // Testnet relayer is keyless → SDK default (SepoliaConfig.relayerUrl) is fine.
     hasFaucet: true,
+    // Our deployed community registry + factory (contracts/, deployed 2026-06-30).
+    customRegistryAddress: '0x9bdCA1F93a5082a34A2Eed5e906a2e0f3c453A99',
+    factoryAddress: '0xDA57C2140F159ED819F3EE8101C5569740f42DBA',
   },
   [mainnet.id]: {
     chain: mainnet,

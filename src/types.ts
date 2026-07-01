@@ -1,6 +1,6 @@
 import type { Address } from 'viem'
 
-export type PairSource = 'registry' | 'local'
+export type PairSource = 'registry' | 'community' | 'local'
 
 export interface TokenMeta {
   address: Address
@@ -18,6 +18,8 @@ export interface RegistryPair {
   source: PairSource
   /** Optional human label from local config. */
   label?: string
+  /** True if added by the user at runtime (browser-saved) — removable from the UI. */
+  custom?: boolean
 }
 
 /** A pair enriched with on-chain token metadata for rendering. */

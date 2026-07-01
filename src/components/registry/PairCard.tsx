@@ -4,6 +4,7 @@ import { ConfidentialBalance } from '@/components/ConfidentialBalance'
 import { PairActions } from './PairActions'
 import { formatAmount, shortAddress, explorerAddress } from '@/lib/format'
 import { useChainId } from 'wagmi'
+import { useCustomPairs } from '@/hooks/useCustomPairs'
 import type { EnrichedPair } from '@/types'
 import type { PairBalances } from '@/hooks/useUserBalances'
 
@@ -15,9 +16,10 @@ interface PairCardProps {
   style?: React.CSSProperties
 }
 
-function Badge({ tone, children }: { tone: 'registry' | 'local' | 'danger' | 'warn'; children: React.ReactNode }) {
+function Badge({ tone, children }: { tone: 'registry' | 'community' | 'local' | 'danger' | 'warn'; children: React.ReactNode }) {
   const map = {
     registry: 'border-zama-yellow bg-zama-soft-yellow text-ink',
+    community: 'border-state-info/40 bg-state-info/10 text-ink-soft',
     local: 'border-line bg-paper-soft text-ink-muted',
     danger: 'border-state-danger/40 bg-state-danger/5 text-state-danger',
     warn: 'border-state-warn/50 bg-zama-soft-orange text-ink-soft',
@@ -49,8 +51,9 @@ function AddressRow({ label, address, chainId }: { label: string; address: strin
 }
 
 export function PairCard({ pair, balances, isConnected, onRefresh, style }: PairCardProps) {
-  const { erc20Meta, confidentialMeta, isValid, source, metaDegraded, rate } = pair
+  const { erc20Meta, confidentialMeta, isValid, source, metaDegraded, rate, custom } = pair
   const chainId = useChainId()
+  const { removePair } = useCustomPairs(chainId)
 
   return (
     <div
@@ -78,7 +81,23 @@ export function PairCard({ pair, balances, isConnected, onRefresh, style }: Pair
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Badge tone={source}>{source === 'registry' ? 'Registry' : 'Local'}</Badge>
+          <div className="flex items-center gap-1">
+            <Badge tone={source}>
+              {custom ? 'Custom' : source === 'registry' ? 'Registry' : source === 'community' ? 'Community' : 'Local'}
+            </Badge>
+            {custom && (
+              <button
+                onClick={() => removePair(confidentialMeta.address)}
+                className="grid h-[18px] w-[18px] place-items-center rounded-md text-ink-faint transition-colors hover:bg-state-danger/10 hover:text-state-danger"
+                title="Remove this custom pair"
+                aria-label="Remove custom pair"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
+          </div>
           {!isValid && <Badge tone="danger">Revoked</Badge>}
           {metaDegraded && <Badge tone="warn">Limited</Badge>}
         </div>

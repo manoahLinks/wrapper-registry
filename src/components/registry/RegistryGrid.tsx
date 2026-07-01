@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useRegistryPairs } from '@/hooks/useRegistryPairs'
 import { useUserBalances } from '@/hooks/useUserBalances'
-import { REPO_URL } from '@/config/app'
+import { useActiveChain } from '@/hooks/useActiveChain'
+import { AddPairModal } from '@/components/actions/AddPairModal'
+import { DeployWrapperModal } from '@/components/actions/DeployWrapperModal'
 import { PairCard } from './PairCard'
 
-type SourceFilter = 'all' | 'registry' | 'local'
+type SourceFilter = 'all' | 'registry' | 'community' | 'local'
 
 function CardSkeleton() {
   return (
@@ -33,13 +35,27 @@ export function RegistryGrid() {
   const [source, setSource] = useState<SourceFilter>('all')
   const [showRevoked, setShowRevoked] = useState(true)
   const [spinning, setSpinning] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
+  const [deployOpen, setDeployOpen] = useState(false)
+  const { config } = useActiveChain()
+
+  const known = useMemo(
+    () => new Set(pairs.map((p) => p.confidential.toLowerCase())),
+    [pairs],
+  )
+  const knownErc20 = useMemo(
+    () => new Set(pairs.map((p) => p.erc20.toLowerCase())),
+    [pairs],
+  )
 
   const hasRevoked = counts.total - counts.valid > 0
   const hasLocal = counts.local > 0
+  const hasCommunity = counts.community > 0
 
   const chips: { key: SourceFilter; label: string; count: number }[] = [
     { key: 'all', label: 'All', count: counts.total },
     { key: 'registry', label: 'Registry', count: counts.registry },
+    ...(hasCommunity ? [{ key: 'community' as const, label: 'Community', count: counts.community }] : []),
     ...(hasLocal ? [{ key: 'local' as const, label: 'Local', count: counts.local }] : []),
   ]
 
@@ -77,15 +93,31 @@ export function RegistryGrid() {
             Official ERC-20 ↔ ERC-7984 pairs, read live from the on-chain Wrappers Registry.
           </p>
         </div>
-        <a
-          href={`${REPO_URL}#adding-a-new-pair`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-[7px] rounded-[10px] border border-dashed border-line-dashed bg-paper-card px-3.5 py-2.5 text-[13px] font-bold text-ink-soft transition-colors hover:border-solid hover:border-ink"
-        >
-          ＋ Add a pair
-        </a>
+        <div className="flex items-center gap-2">
+          {config.factoryAddress && (
+            <button
+              onClick={() => setDeployOpen(true)}
+              className="btn-primary px-3.5 py-2.5 text-[13px]"
+            >
+              ⚡ Deploy a wrapper
+            </button>
+          )}
+          <button
+            onClick={() => setAddOpen(true)}
+            className="inline-flex items-center gap-[7px] rounded-[10px] border border-dashed border-line-dashed bg-paper-card px-3.5 py-2.5 text-[13px] font-bold text-ink-soft transition-colors hover:border-solid hover:border-ink"
+          >
+            ＋ Add a pair
+          </button>
+        </div>
       </div>
+
+      <AddPairModal open={addOpen} onClose={() => setAddOpen(false)} known={known} />
+      <DeployWrapperModal
+        open={deployOpen}
+        onClose={() => setDeployOpen(false)}
+        onDeployed={refetch}
+        knownErc20={knownErc20}
+      />
 
       {/* Controls */}
       <div className="mt-[22px] flex flex-wrap items-center gap-3.5">
