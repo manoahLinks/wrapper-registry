@@ -8,6 +8,8 @@
     "test": "hardhat test",
     "deploy:sepolia": "hardhat deploy --network sepolia --tags factory",
     "deploy:mainnet": "hardhat deploy --network mainnet --tags factory",
+    "deploy:mock:sepolia": "hardhat run scripts/deployMock.ts --network sepolia",
+    "deploy:mock:mainnet": "hardhat run scripts/deployMock.ts --network mainnet",
     "verify:sepolia": "hardhat etherscan-verify --network sepolia",
     "verify:mainnet": "hardhat etherscan-verify --network mainnet"
   },
