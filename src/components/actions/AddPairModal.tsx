@@ -346,7 +346,8 @@ export function AddPairModal({ open, onClose, known, knownErc20, onChanged }: Ad
   const [mode, setMode] = useState<Mode>(tabs[0]?.key ?? 'track')
 
   function close() {
-    if (busy) return
+    // Always allow closing — including from the Done screen, where a finished
+    // flow leaves `busy` true (it hides the tabs). Reset it on the way out.
     setBusy(false)
     onClose()
   }

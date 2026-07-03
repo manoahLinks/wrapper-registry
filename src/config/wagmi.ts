@@ -13,9 +13,11 @@ export const wagmiConfig = getDefaultConfig({
   // Sepolia first → it's the default/initial chain (no real funds at risk).
   chains: [sepolia, mainnet],
   transports: {
-    // `http(undefined)` uses the chain's public RPC; a custom URL is preferred.
-    [sepolia.id]: http(SUPPORTED_CHAINS[sepolia.id].rpcUrl),
-    [mainnet.id]: http(SUPPORTED_CHAINS[mainnet.id].rpcUrl),
+    // Prefer the env RPC; otherwise use our vetted public fallback (publicnode)
+    // rather than viem's chain default (cloudflare-eth), which rate-limits hard
+    // on mainnet and intermittently drops the registry read.
+    [sepolia.id]: http(SUPPORTED_CHAINS[sepolia.id].rpcUrl || SUPPORTED_CHAINS[sepolia.id].fallbackRpcUrl),
+    [mainnet.id]: http(SUPPORTED_CHAINS[mainnet.id].rpcUrl || SUPPORTED_CHAINS[mainnet.id].fallbackRpcUrl),
   },
   ssr: false,
 })
