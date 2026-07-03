@@ -41,7 +41,7 @@ Precedence (highest → lowest), in `src/hooks/useRegistryPairs.ts`:
 There are four supported ways, from quickest to most permanent. Pick the one that
 matches how widely the pair should be visible.
 
-### A. In‑app, on‑chain for everyone — **⚡ Deploy a wrapper** (recommended)
+### A. In‑app, on‑chain for everyone — **Deploy a wrapper** (recommended)
 
 If the ERC‑20 has **no** wrapper yet, deploy one and register it — all from the UI.
 Our `ConfidentialWrapperFactory` deploys an ERC‑7984 wrapper and registers the pair
@@ -49,7 +49,7 @@ in our community `WrapperRegistry` in a single transaction, so it appears for
 everyone (Zama's official registry is owner‑gated and can't accept user pairs).
 
 1. Connect a wallet on a supported chain where the factory is configured (Sepolia).
-2. Click **⚡ Deploy a wrapper** → paste the **ERC‑20 address**.
+2. Click **Deploy a wrapper** → paste the **ERC‑20 address**.
 3. It reads the token, derives `Confidential <name>` / `c<SYMBOL>`, and on confirm
    calls `factory.createWrapper(erc20, name, symbol, uri)`.
 4. The new pair shows up with a **Community** badge.

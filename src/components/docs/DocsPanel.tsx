@@ -113,7 +113,7 @@ registry.registerConfidentialToken(
           so the app reads both with one code path. Ours is open but still <b className="text-ink">validated</b>:
           it requires <span className="font-mono text-[12px]">confidentialToken.underlying() == token</span> and
           rejects duplicates. A companion <span className="font-mono text-[12.5px]">ConfidentialWrapperFactory</span>{' '}
-          deploys a wrapper and registers it in one transaction — that's the ⚡ Deploy a wrapper button.
+          deploys a wrapper and registers it in one transaction — that's the Deploy a wrapper button.
         </p>
         {(registry || factory) && (
           <div className="mt-3 space-y-1 font-mono text-[11.5px] text-ink-muted">
@@ -123,20 +123,26 @@ registry.registerConfidentialToken(
         )}
       </div>
 
-      {/* The four ways */}
+      {/* The ways to add a pair */}
       <div className="mt-8">
-        <h3 className="font-display text-lg font-bold text-ink">Four ways to add a pair</h3>
+        <h3 className="font-display text-lg font-bold text-ink">Ways to add a pair</h3>
+        <p className="mt-1.5 text-[13.5px] text-ink-muted">
+          The <b className="text-ink">＋ Add a pair</b> button has three modes; two more are for
+          developers.
+        </p>
         <div className="mt-3 grid gap-3">
-          <Method tag="Recommended" tagTone="border-zama-yellow bg-zama-soft-yellow text-ink" title="⚡ Deploy a wrapper — on-chain, for everyone">
-            <p>No wrapper yet? Click <b className="text-ink">⚡ Deploy a wrapper</b>, paste the ERC‑20 address. The factory deploys an ERC‑7984 wrapper and registers the pair in our community registry — it appears for all users with a <b className="text-ink">Community</b> badge.</p>
-            <Code>{`factory.createWrapper(erc20, "Confidential X", "cX", "");
-// or, for an existing wrapper:
-registry.register(erc20, existingWrapper);`}</Code>
+          <Method tag="Add a pair · 1" tagTone="border-zama-yellow bg-zama-soft-yellow text-ink" title="Deploy new — on-chain, for everyone">
+            <p>No wrapper yet? Paste the <b className="text-ink">ERC‑20</b> address. The factory deploys an ERC‑7984 wrapper and registers the pair in the community registry — it appears for all users with a <b className="text-ink">Community</b> badge.</p>
+            <Code>{`factory.createWrapper(erc20, "Confidential X", "cX", "");`}</Code>
           </Method>
-          <Method tag="Per user" tagTone="border-state-info/40 bg-state-info/10 text-ink-soft" title="＋ Add a pair — browser-saved">
-            <p>Track any already‑deployed ERC‑7984 wrapper privately. Paste the wrapper address; we read <span className="font-mono text-[12px]">underlying()</span> to derive the ERC‑20 and validate it. Stored in your browser (per chain), removable via the card's ×.</p>
+          <Method tag="Add a pair · 2" tagTone="border-state-info/40 bg-state-info/10 text-ink-soft" title="Register existing — on-chain, for everyone">
+            <p>Already deployed a wrapper elsewhere? Paste the <b className="text-ink">ERC‑7984</b> address to register it in the community registry (validated on-chain: <span className="font-mono text-[12px]">underlying()</span> must match). Also a <b className="text-ink">Community</b> pair.</p>
+            <Code>{`registry.register(erc20, existingWrapper);`}</Code>
           </Method>
-          <Method tag="Default" tagTone="border-line bg-paper-soft text-ink-muted" title="Local config — ship a pair with the app">
+          <Method tag="Add a pair · 3" tagTone="border-line bg-paper-soft text-ink-muted" title="Save to browser — private">
+            <p>Track any ERC‑7984 wrapper privately (no gas). Stored in <span className="font-mono text-[12px]">localStorage</span> per chain, rendered with a <b className="text-ink">Custom</b> badge, removable via the card's ×.</p>
+          </Method>
+          <Method tag="Dev" tagTone="border-line bg-paper-soft text-ink-muted" title="Local config — ship a pair with the app">
             <p>Add an entry to <span className="font-mono text-[12px]">LOCAL_PAIRS</span> in <span className="font-mono text-[12px]">src/config/pairs.config.ts</span>. Merged on top of the on‑chain registry, rendered with a <b className="text-ink">Local</b> badge.</p>
             <Code>{`export const LOCAL_PAIRS: LocalPair[] = [
   { erc20: '0x…', confidential: '0x…', label: 'My dev token' },

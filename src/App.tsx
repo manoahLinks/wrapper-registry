@@ -1,10 +1,11 @@
+import { useState } from 'react'
 import { useChainId } from 'wagmi'
 import { Header } from './components/Header'
 import { NetworkBanner } from './components/NetworkBanner'
 import { WrapLoop } from './components/WrapLoop'
 import { RegistryGrid } from './components/registry/RegistryGrid'
 import { DecryptPanel } from './components/decrypt/DecryptPanel'
-import { DocsPanel } from './components/docs/DocsPanel'
+import { DocsModal } from './components/docs/DocsModal'
 import { useRegistryPairs } from './hooks/useRegistryPairs'
 import { shortAddress } from './lib/format'
 import { useActiveChain } from './hooks/useActiveChain'
@@ -115,19 +116,20 @@ function Footer() {
 }
 
 export default function App() {
+  const [docsOpen, setDocsOpen] = useState(false)
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header onOpenDocs={() => setDocsOpen(true)} />
       <NetworkBanner />
       <main className="mx-auto w-full max-w-[1240px] flex-1 px-7">
         <Hero />
         <RegistryGrid />
         <DecryptPanel />
-        <DocsPanel />
       </main>
       <div className="mx-auto w-full max-w-[1240px] px-7">
         <Footer />
       </div>
+      <DocsModal open={docsOpen} onClose={() => setDocsOpen(false)} />
     </div>
   )
 }

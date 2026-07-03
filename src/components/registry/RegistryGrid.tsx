@@ -2,9 +2,7 @@ import { useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useRegistryPairs } from '@/hooks/useRegistryPairs'
 import { useUserBalances } from '@/hooks/useUserBalances'
-import { useActiveChain } from '@/hooks/useActiveChain'
 import { AddPairModal } from '@/components/actions/AddPairModal'
-import { DeployWrapperModal } from '@/components/actions/DeployWrapperModal'
 import { PairCard } from './PairCard'
 
 type SourceFilter = 'all' | 'registry' | 'community' | 'local'
@@ -36,8 +34,6 @@ export function RegistryGrid() {
   const [showRevoked, setShowRevoked] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
-  const [deployOpen, setDeployOpen] = useState(false)
-  const { config } = useActiveChain()
 
   const known = useMemo(
     () => new Set(pairs.map((p) => p.confidential.toLowerCase())),
@@ -93,30 +89,20 @@ export function RegistryGrid() {
             Official ERC-20 ↔ ERC-7984 pairs, read live from the on-chain Wrappers Registry.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {config.factoryAddress && (
-            <button
-              onClick={() => setDeployOpen(true)}
-              className="btn-primary px-3.5 py-2.5 text-[13px]"
-            >
-              ⚡ Deploy a wrapper
-            </button>
-          )}
-          <button
-            onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-[7px] rounded-[10px] border border-dashed border-line-dashed bg-paper-card px-3.5 py-2.5 text-[13px] font-bold text-ink-soft transition-colors hover:border-solid hover:border-ink"
-          >
-            ＋ Add a pair
-          </button>
-        </div>
+        <button
+          onClick={() => setAddOpen(true)}
+          className="inline-flex items-center gap-[7px] rounded-[10px] border border-dashed border-line-dashed bg-paper-card px-3.5 py-2.5 text-[13px] font-bold text-ink-soft transition-colors hover:border-solid hover:border-ink"
+        >
+          ＋ Add a pair
+        </button>
       </div>
 
-      <AddPairModal open={addOpen} onClose={() => setAddOpen(false)} known={known} />
-      <DeployWrapperModal
-        open={deployOpen}
-        onClose={() => setDeployOpen(false)}
-        onDeployed={refetch}
+      <AddPairModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        known={known}
         knownErc20={knownErc20}
+        onChanged={refetch}
       />
 
       {/* Controls */}

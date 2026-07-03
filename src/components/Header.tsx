@@ -3,12 +3,14 @@ import { FhevmStatusPill } from './FhevmStatusPill'
 import { WalletButton } from './WalletButton'
 
 const NAV = [
-  { label: 'Registry', href: '#registry', external: false },
-  { label: 'Decrypt', href: '#decrypt', external: false },
-  { label: 'Docs', href: '#docs', external: false },
+  { label: 'Registry', href: '#registry' },
+  { label: 'Decrypt', href: '#decrypt' },
 ]
 
-export function Header() {
+const navClass =
+  'rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-paper-sunken hover:text-ink'
+
+export function Header({ onOpenDocs }: { onOpenDocs: () => void }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper/[0.86] backdrop-blur-md">
       <div className="mx-auto flex h-[66px] max-w-[1240px] items-center gap-6 px-7">
@@ -17,15 +19,13 @@ export function Header() {
         </a>
         <nav className="ml-2.5 hidden items-center gap-1 md:flex">
           {NAV.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}
-              className="rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-paper-sunken hover:text-ink"
-            >
+            <a key={item.label} href={item.href} className={navClass}>
               {item.label}
             </a>
           ))}
+          <button onClick={onOpenDocs} className={navClass}>
+            Docs
+          </button>
         </nav>
 
         <div className="flex-1" />
