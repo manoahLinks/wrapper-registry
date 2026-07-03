@@ -4,6 +4,7 @@ import { NetworkBanner } from './components/NetworkBanner'
 import { WrapLoop } from './components/WrapLoop'
 import { RegistryGrid } from './components/registry/RegistryGrid'
 import { DecryptPanel } from './components/decrypt/DecryptPanel'
+import { DocsPanel } from './components/docs/DocsPanel'
 import { useRegistryPairs } from './hooks/useRegistryPairs'
 import { shortAddress } from './lib/format'
 import { useActiveChain } from './hooks/useActiveChain'
@@ -122,6 +123,7 @@ export default function App() {
         <Hero />
         <RegistryGrid />
         <DecryptPanel />
+        <DocsPanel />
       </main>
       <div className="mx-auto w-full max-w-[1240px] px-7">
         <Footer />

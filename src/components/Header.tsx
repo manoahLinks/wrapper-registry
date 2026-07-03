@@ -2,12 +2,10 @@ import { BrandMark } from './BrandMark'
 import { FhevmStatusPill } from './FhevmStatusPill'
 import { WalletButton } from './WalletButton'
 
-import { REPO_URL } from '@/config/app'
-
 const NAV = [
   { label: 'Registry', href: '#registry', external: false },
   { label: 'Decrypt', href: '#decrypt', external: false },
-  { label: 'Docs', href: REPO_URL, external: true },
+  { label: 'Docs', href: '#docs', external: false },
 ]
 
 export function Header() {
