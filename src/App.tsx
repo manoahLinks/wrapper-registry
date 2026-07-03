@@ -70,11 +70,11 @@ function Hero() {
             </a>
           </div>
 
-          <div className="mt-11 flex gap-[30px] font-mono">
+          <div className="mt-11 flex flex-wrap gap-x-7 gap-y-4 font-mono sm:gap-[30px]">
             <Stat value={counts.total || '—'} label="registry pairs" />
-            <div className="w-px bg-line" />
+            <div className="hidden w-px bg-line sm:block" />
             <Stat value="ERC-7984" label="confidential standard" />
-            <div className="w-px bg-line" />
+            <div className="hidden w-px bg-line sm:block" />
             <Stat
               value={
                 <>
@@ -121,12 +121,12 @@ export default function App() {
     <div className="flex min-h-screen flex-col">
       <Header onOpenDocs={() => setDocsOpen(true)} />
       <NetworkBanner />
-      <main className="mx-auto w-full max-w-[1240px] flex-1 px-7">
+      <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 sm:px-7">
         <Hero />
         <RegistryGrid />
         <DecryptPanel />
       </main>
-      <div className="mx-auto w-full max-w-[1240px] px-7">
+      <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-7">
         <Footer />
       </div>
       <DocsModal open={docsOpen} onClose={() => setDocsOpen(false)} />

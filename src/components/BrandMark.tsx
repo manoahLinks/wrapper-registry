@@ -20,7 +20,7 @@ export function BrandMark({ size = 36, withWordmark = true }: BrandMarkProps) {
         </svg>
       </span>
       {withWordmark && (
-        <div className="leading-none">
+        <div className="hidden leading-none sm:block">
           <div className="font-display text-[15px] font-extrabold tracking-tight text-ink">
             Wrapper Registry
           </div>

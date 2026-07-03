@@ -13,7 +13,7 @@ const navClass =
 export function Header({ onOpenDocs }: { onOpenDocs: () => void }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper/[0.86] backdrop-blur-md">
-      <div className="mx-auto flex h-[66px] max-w-[1240px] items-center gap-6 px-7">
+      <div className="mx-auto flex h-[66px] max-w-[1240px] items-center gap-3 px-4 sm:gap-6 sm:px-7">
         <a href="#top" className="shrink-0">
           <BrandMark />
         </a>

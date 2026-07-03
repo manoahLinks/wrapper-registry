@@ -18,7 +18,7 @@ interface WrapLoopProps {
 export function WrapLoop({ sym = 'USDC', csym = 'cUSDC', chrome = false, height = 158 }: WrapLoopProps) {
   return (
     <div
-      className="w-full rounded-card border border-line bg-paper-card"
+      className="w-full overflow-hidden rounded-card border border-line bg-paper-card"
       style={{ fontFamily: "'JetBrains Mono', monospace", padding: '20px 22px 18px', boxShadow: '0 14px 38px rgba(28,22,8,.08)', animation: 'wlIn .7s cubic-bezier(.2,.7,.2,1) .15s both' }}
     >
       {chrome && (

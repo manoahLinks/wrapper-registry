@@ -141,8 +141,8 @@ export function RegistryGrid() {
 
         <div className="flex-1" />
 
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-[42px] w-[280px] max-w-full items-center gap-2.5 rounded-[11px] border border-line bg-paper-card px-3.5 focus-within:border-ink">
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
+          <div className="flex h-[42px] w-full items-center gap-2.5 rounded-[11px] border border-line bg-paper-card px-3.5 focus-within:border-ink sm:w-[280px]">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A294" strokeWidth="2" className="shrink-0">
               <circle cx="11" cy="11" r="7" />
               <path d="m21 21-4.3-4.3" strokeLinecap="round" />
@@ -176,7 +176,7 @@ export function RegistryGrid() {
           <button onClick={refetch} className="btn-primary">Retry</button>
         </div>
       ) : isLoading && pairs.length === 0 ? (
-        <div className="mt-[22px] grid gap-[18px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(372px, 1fr))' }}>
+        <div className="mt-[22px] grid gap-[18px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))' }}>
           {Array.from({ length: 6 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
@@ -195,7 +195,7 @@ export function RegistryGrid() {
           </button>
         </div>
       ) : (
-        <div className="mt-[22px] grid gap-[18px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(372px, 1fr))' }}>
+        <div className="mt-[22px] grid gap-[18px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))' }}>
           {filtered.map((pair, i) => (
             <PairCard
               key={pair.confidential}

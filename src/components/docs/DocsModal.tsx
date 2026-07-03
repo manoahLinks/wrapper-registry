@@ -31,7 +31,7 @@ export function DocsModal({ open, onClose }: { open: boolean; onClose: () => voi
       }}
     >
       <div className="sticky top-0 z-10 border-b border-line bg-paper/[0.86] backdrop-blur-md">
-        <div className="mx-auto flex h-[66px] max-w-[1240px] items-center justify-between px-7">
+        <div className="mx-auto flex h-[66px] max-w-[1240px] items-center justify-between px-4 sm:px-7">
           <BrandMark />
           <button onClick={onClose} className="btn-outline px-4 py-2 text-sm">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -41,7 +41,7 @@ export function DocsModal({ open, onClose }: { open: boolean; onClose: () => voi
           </button>
         </div>
       </div>
-      <div className="mx-auto max-w-[1240px] px-7 pb-16">
+      <div className="mx-auto max-w-[1240px] px-4 pb-16 sm:px-7">
         <DocsPanel />
       </div>
     </div>,
