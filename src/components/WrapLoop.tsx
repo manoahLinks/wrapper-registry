@@ -24,7 +24,7 @@ export function WrapLoop({ sym = 'USDC', csym = 'cUSDC', chrome = false, height 
       {chrome && (
         <div className="mb-1.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wide text-ink-muted">
-            <span className="text-line-dashed">▸</span>confidential wrap engine
+            <span className="text-line-dashed">▸</span>confidential shield engine
           </div>
           <div className="flex items-center gap-1.5 text-[10px] tracking-[0.1em] text-ink-faint">
             <span className="h-1.5 w-1.5 rounded-full bg-state-success" style={{ animation: 'wlBlink 1.8s ease-in-out infinite' }} />
@@ -37,8 +37,8 @@ export function WrapLoop({ sym = 'USDC', csym = 'cUSDC', chrome = false, height 
       <div className="relative mx-auto mt-1.5 w-[360px] max-w-full" style={{ height }}>
         {/* direction labels */}
         <div className="absolute left-[120px] top-0 h-4 w-[120px] text-center">
-          <span className="absolute inset-0 text-[11px] font-bold tracking-[0.12em]" style={{ color: '#7A6B00', animation: 'wlWrapOn 7s ease-in-out infinite' }}>wrap →</span>
-          <span className="absolute inset-0 text-[11px] font-bold tracking-[0.12em] text-ink-muted" style={{ animation: 'wlUnwrapOn 7s ease-in-out infinite' }}>← unwrap</span>
+          <span className="absolute inset-0 text-[11px] font-bold tracking-[0.12em]" style={{ color: '#7A6B00', animation: 'wlWrapOn 7s ease-in-out infinite' }}>shield →</span>
+          <span className="absolute inset-0 text-[11px] font-bold tracking-[0.12em] text-ink-muted" style={{ animation: 'wlUnwrapOn 7s ease-in-out infinite' }}>← unshield</span>
         </div>
 
         {/* flow track */}

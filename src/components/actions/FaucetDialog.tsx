@@ -89,12 +89,12 @@ export function FaucetDialog({ pair, open, onClose, onSuccess }: FaucetDialogPro
       open={open}
       onClose={close}
       title={`Claim ${symbol}`}
-      subtitle="Mint free test tokens, then wrap them into their confidential form."
+      subtitle="Mint free test tokens, then shield them into their confidential form."
     >
       {step === 'done' ? (
         <DoneStep
           title={`Claimed ${amountNum.toLocaleString()} ${symbol}`}
-          sub={`Test ${symbol} has been minted to your wallet. Wrap it into the confidential form next.`}
+          sub={`Test ${symbol} has been minted to your wallet. Shield it into the confidential form next.`}
           txHash={txHash ?? undefined}
           txUrl={txHash ? explorerTx(txHash, chainId) : undefined}
           onDone={close}

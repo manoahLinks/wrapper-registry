@@ -93,7 +93,7 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
       setStep('done')
       toast.push({
         kind: 'success',
-        title: `Wrapped into ${conf.symbol}`,
+        title: `Shielded into ${conf.symbol}`,
         description: `Received ~${receiveDisplay} ${conf.symbol} (encrypted).`,
         txHash: hash,
       })
@@ -102,7 +102,7 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
     } catch (e) {
       setStep('error')
       setErrorMsg(parseTxError(e))
-      toast.push({ kind: 'error', title: 'Wrap failed', description: parseTxError(e) })
+      toast.push({ kind: 'error', title: 'Shield failed', description: parseTxError(e) })
     }
   }
 
@@ -117,7 +117,7 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
       : []),
     {
       key: 'wrap',
-      title: `Wrap into ${conf.symbol}`,
+      title: `Shield into ${conf.symbol}`,
       detail: 'Mints your confidential balance',
       state: step === 'wrapping' ? 'active' : step === 'done' ? 'done' : 'todo',
     },
@@ -127,12 +127,12 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
     <Modal
       open={open}
       onClose={close}
-      title={`Wrap ${erc20.symbol}`}
+      title={`Shield ${erc20.symbol}`}
       subtitle={`Convert public ${erc20.symbol} into confidential ${conf.symbol}.`}
     >
       {step === 'done' ? (
         <DoneStep
-          title={`Wrapped into ${conf.symbol}`}
+          title={`Shielded into ${conf.symbol}`}
           sub={`~${receiveDisplay} ${conf.symbol} is now in your wallet — encrypted on-chain.`}
           txHash={txHash ?? undefined}
           txUrl={txHash ? explorerTx(txHash, chainId) : undefined}
@@ -158,19 +158,19 @@ export function WrapDialog({ pair, open, onClose, onSuccess }: WrapDialogProps) 
           {overBalance ? (
             <AmountError>Exceeds your balance.</AmountError>
           ) : belowMin ? (
-            <AmountError>Minimum {minHuman} {erc20.symbol} to wrap.</AmountError>
+            <AmountError>Minimum {minHuman} {erc20.symbol} to shield.</AmountError>
           ) : errorMsg ? (
             <AmountError>{errorMsg}</AmountError>
           ) : dustRaw > 0n ? (
             <p className="mt-2.5 text-center text-[11.5px] text-ink-faint">
-              {formatAmount(dustRaw, erc20.decimals, 6)} {erc20.symbol} below the wrap increment stays in your wallet.
+              {formatAmount(dustRaw, erc20.decimals, 6)} {erc20.symbol} below the shield increment stays in your wallet.
             </p>
           ) : null}
 
           <button onClick={submit} disabled={invalid} className="btn-primary mt-4 w-full py-3.5 text-[14.5px]">
-            {needsApproval && amountRaw > 0n ? 'Approve & Wrap' : `Wrap ${erc20.symbol}`}
+            {needsApproval && amountRaw > 0n ? 'Approve & Shield' : `Shield ${erc20.symbol}`}
           </button>
-          <PrivacyNote>Your wrapped balance is encrypted on-chain.</PrivacyNote>
+          <PrivacyNote>Your shielded balance is encrypted on-chain.</PrivacyNote>
         </>
       )}
     </Modal>

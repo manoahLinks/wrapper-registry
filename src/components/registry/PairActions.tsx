@@ -54,12 +54,12 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
         className="btn-primary w-full px-2 py-2 text-xs"
         disabled={!isConnected || !pair.isValid}
         onClick={() => setWrapOpen(true)}
-        title={!pair.isValid ? 'This pair is revoked' : disabledTitle ?? 'Wrap into the confidential token'}
+        title={!pair.isValid ? 'This pair is revoked' : disabledTitle ?? 'Shield into the confidential token'}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 2 4 6v6c0 5 3.4 7.7 8 10 4.6-2.3 8-5 8-10V6l-8-4Z" strokeLinejoin="round" />
         </svg>
-        Wrap
+        Shield
       </button>
 
       <button
@@ -70,14 +70,14 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
           !isConnected
             ? 'Connect a wallet first'
             : !hasConfidential
-              ? `No ${pair.confidentialMeta.symbol} balance to unwrap`
-              : 'Unwrap back to the public token'
+              ? `No ${pair.confidentialMeta.symbol} balance to unshield`
+              : 'Unshield back to the public token'
         }
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M5 12h14M11 6 5 12l6 6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Unwrap
+        Unshield
       </button>
 
       <FaucetDialog

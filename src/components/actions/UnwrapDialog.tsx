@@ -19,7 +19,7 @@ type Step = 'idle' | 'encrypting' | 'unwrapping' | 'decrypting' | 'finalizing' |
 const STEP_ORDER: Step[] = ['encrypting', 'unwrapping', 'decrypting', 'finalizing']
 const STEP_LABEL: Record<string, string> = {
   encrypting: 'Encrypt the amount',
-  unwrapping: 'Submit unwrap request',
+  unwrapping: 'Submit unshield request',
   decrypting: 'Reveal amount (relayer)',
   finalizing: 'Finalize & release tokens',
 }
@@ -127,7 +127,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
       setStep('done')
       toast.push({
         kind: 'success',
-        title: `Unwrapped to ${erc20.symbol}`,
+        title: `Unshielded to ${erc20.symbol}`,
         description: `Released ${formatAmount(releasedErc20, erc20.decimals)} ${erc20.symbol} to your wallet.`,
         txHash: hash,
       })
@@ -135,7 +135,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
     } catch (e) {
       setStep('error')
       setErrorMsg(parseTxError(e))
-      toast.push({ kind: 'error', title: 'Unwrap failed', description: parseTxError(e) })
+      toast.push({ kind: 'error', title: 'Unshield failed', description: parseTxError(e) })
     }
   }
 
@@ -151,12 +151,12 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
     <Modal
       open={open}
       onClose={close}
-      title={`Unwrap ${conf.symbol}`}
+      title={`Unshield ${conf.symbol}`}
       subtitle={`Convert confidential ${conf.symbol} back into public ${erc20.symbol}.`}
     >
       {step === 'done' ? (
         <DoneStep
-          title={`Unwrapped to ${erc20.symbol}`}
+          title={`Unshielded to ${erc20.symbol}`}
           sub="The public tokens have been released to your wallet."
           reveal={released != null ? `${formatAmount(released, erc20.decimals)} ${erc20.symbol}` : undefined}
           txHash={txHash ?? undefined}
@@ -194,12 +194,12 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
 
           {unwrapAll && (
             <p className="mt-2.5 text-center text-xs font-medium text-ink-muted">
-              Unwrapping your entire {conf.symbol} balance.
+              Unshielding your entire {conf.symbol} balance.
             </p>
           )}
           {!balances?.hasConfidential && (
             <p className="mt-2.5 text-center text-xs text-state-warn">
-              You don't appear to hold any {conf.symbol} yet — wrap some first.
+              You don't appear to hold any {conf.symbol} yet — shield some first.
             </p>
           )}
           {errorMsg && <AmountError>{errorMsg}</AmountError>}
@@ -210,7 +210,7 @@ export function UnwrapDialog({ pair, balances, open, onClose, onSuccess }: Unwra
             className="btn-primary mt-4 w-full py-3.5 text-[14.5px]"
             title={!ready ? 'Waiting for the encryption engine…' : undefined}
           >
-            {step === 'error' ? 'Try again' : `Unwrap ${conf.symbol}`}
+            {step === 'error' ? 'Try again' : `Unshield ${conf.symbol}`}
           </button>
           <PrivacyNote>Burned confidentially, released publicly to you.</PrivacyNote>
         </>

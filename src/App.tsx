@@ -53,7 +53,7 @@ function Hero() {
 
           <p className="mt-[26px] max-w-[52ch] text-[17px] leading-[1.55] text-ink-muted">
             One home for the canonical ERC-20 ↔ ERC-7984 pairs. Browse the registry, claim test
-            tokens, wrap into encrypted balances, and decrypt what's yours — all in one place.
+            tokens, shield into encrypted balances, and decrypt what's yours — all in one place.
           </p>
 
           <div className="mt-[30px] flex flex-wrap items-center gap-3">
