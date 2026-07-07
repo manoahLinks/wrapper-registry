@@ -56,10 +56,15 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
         onClick={() => setWrapOpen(true)}
         title={!pair.isValid ? 'This pair is revoked' : disabledTitle ?? 'Shield into the confidential token'}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 2 4 6v6c0 5 3.4 7.7 8 10 4.6-2.3 8-5 8-10V6l-8-4Z" strokeLinejoin="round" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="3" width="12" height="18" rx="6" />
+          <path d="M6 9c4 0 8 2 12 4" />
+          <path d="M6 14c4 0 8-2 12-2" />
+          <line x1="9" y1="6" x2="10" y2="6" />
+          <line x1="14" y1="18" x2="15" y2="18" />
         </svg>
-        Shield
+
+        Wrap
       </button>
 
       <button
@@ -74,10 +79,14 @@ export function PairActions({ pair, balances, onRefresh }: PairActionsProps) {
               : 'Unshield back to the public token'
         }
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M5 12h14M11 6 5 12l6 6" strokeLinecap="round" strokeLinejoin="round" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12c0 5 4 9 9 9s9-4 9-9H3z" />
+          <path d="M5 12c1-2 2-3 4-3s3 2 3 2 1-3 3-3 3 2 4 4" />
+          <circle cx="10" cy="11" r="1" fill="currentColor" />
+          <circle cx="14" cy="10" r="1" fill="currentColor" />
         </svg>
-        Unshield
+
+        Unwrap
       </button>
 
       <FaucetDialog
