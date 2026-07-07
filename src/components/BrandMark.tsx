@@ -13,7 +13,7 @@ export function BrandMark({ size = 100, withWordmark = true }: BrandMarkProps) {
         style={{ width: size, height: size }}
         aria-hidden
       >
-        <img src="../../public/tacos-icon.png" alt="Wrapper Registry" className="w-full h-full object-contain" />
+        <img src="/tacos-icon.png" alt="Wrapper Registry" className="w-full h-full object-contain" />
       </span>
       {withWordmark && (
         <div className="hidden leading-none sm:block">
